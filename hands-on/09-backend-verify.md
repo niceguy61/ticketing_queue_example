@@ -76,7 +76,7 @@ curl -s http://localhost:3001/health | jq
 ```bash
 curl -s -X POST http://localhost:3003/api/users/register \
   -H "Content-Type: application/json" \
-  -d '{"name": "테스트유저", "email": "test@example.com"}' | jq
+  -d '{"username": "testuser", "email": "test@example.com"}' | jq
 ```
 
 **예상 출력:**
@@ -84,10 +84,10 @@ curl -s -X POST http://localhost:3003/api/users/register \
 {
   "success": true,
   "data": {
-    "id": "...",
-    "name": "테스트유저",
+    "user_id": "...",
+    "username": "testuser",
     "email": "test@example.com",
-    "createdAt": "..."
+    "created_at": "..."
   }
 }
 ```
@@ -95,8 +95,8 @@ curl -s -X POST http://localhost:3003/api/users/register \
 ### 사용자 조회
 
 ```bash
-# 위에서 생성된 사용자 ID로 조회
-curl -s http://localhost:3003/api/users/<user-id> | jq
+# 위에서 생성된 user_id로 조회
+curl -s http://localhost:3003/api/users/<user_id> | jq
 ```
 
 ---
@@ -107,7 +107,7 @@ curl -s http://localhost:3003/api/users/<user-id> | jq
 
 ```bash
 # 특정 사용자의 티켓 목록 조회
-curl -s http://localhost:3002/api/tickets/user/<user-id> | jq
+curl -s http://localhost:3002/api/tickets/user/<user_id> | jq
 ```
 
 **예상 출력:**
@@ -175,15 +175,15 @@ docker compose logs queue-service | grep -i "ticket"
 
 ```bash
 # 1. 사용자 생성 (이미 생성했다면 생략)
-USER_RESPONSE=$(curl -s -X POST http://localhost:3003/api/users \
+USER_RESPONSE=$(curl -s -X POST http://localhost:3003/api/users/register \
   -H "Content-Type: application/json" \
-  -d '{"name": "QueueTest", "email": "queue@test.com"}')
+  -d '{"username": "queuetest", "email": "queue@test.com"}')
 
-USER_ID=$(echo $USER_RESPONSE | jq -r '.data.id')
+USER_ID=$(echo $USER_RESPONSE | jq -r '.data.user_id')
 echo "Created User ID: $USER_ID"
 
 # 2. 대기열 진입
-curl -s -X POST http://localhost:3001/api/queue/join \
+curl -s -X POST http://localhost:3001/api/queue/lobby/join \
   -H "Content-Type: application/json" \
   -d "{\"userId\": \"$USER_ID\"}" | jq
 ```
