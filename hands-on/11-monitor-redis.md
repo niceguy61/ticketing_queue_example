@@ -27,21 +27,21 @@ http://localhost:8081
 ### Redis Commander 메인 화면
 
 <!-- TODO: Redis Commander 메인 화면 캡쳐 (키 목록이 보이는 상태) -->
-![Redis Commander 메인 화면](./images/redis-commander-main.png)
+![Redis Commander 메인 화면](images/redis-commander-main.png)
 
 ### ZSET 데이터 상세 보기
 
 `lobby:queue` 키를 클릭하면 대기열에 있는 사용자 목록을 확인할 수 있습니다.
 
 <!-- TODO: lobby:queue ZSET 상세 화면 캡쳐 (멤버와 score가 보이는 상태) -->
-![Redis ZSET 상세 화면](./images/redis-commander-zset.png)
+![Redis ZSET 상세 화면](images/redis-commander-zset.png)
 
 ### queue:config 설정 확인
 
 `queue:config` 키를 클릭하면 현재 대기열 설정(mode, capacity 등)을 확인할 수 있습니다.
 
 <!-- TODO: queue:config Hash 상세 화면 캡쳐 -->
-![Redis Hash 설정 화면](./images/redis-commander-config.png)
+![Redis Hash 설정 화면](images/redis-commander-config.png)
 
 ---
 

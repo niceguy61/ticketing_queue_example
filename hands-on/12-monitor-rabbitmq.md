@@ -24,6 +24,11 @@ http://localhost:15672
 - Username: `admin`
 - Password: `password`
 
+### 로그인 화면
+
+<!-- TODO: RabbitMQ 로그인 화면 캡쳐 -->
+![RabbitMQ 로그인 화면](images/rabbitmq-login.png)
+
 ---
 
 ## 2. 대시보드 개요
@@ -37,11 +42,21 @@ http://localhost:15672
 | Connections | 연결된 클라이언트 수 |
 | Channels | 열린 채널 수 |
 
+### Overview 대시보드
+
+<!-- TODO: RabbitMQ Overview 대시보드 캡쳐 (메시지 그래프, 노드 정보가 보이는 상태) -->
+![RabbitMQ Overview 대시보드](images/rabbitmq-overview.png)
+
 ---
 
 ## 3. Queues 탭
 
 **Queues** 탭을 클릭하면 생성된 큐 목록이 표시됩니다.
+
+### Queues 탭 화면
+
+<!-- TODO: RabbitMQ Queues 탭 캡쳐 (큐 목록, 메시지 수, 컨슈머 수가 보이는 상태) -->
+![RabbitMQ Queues 탭](images/rabbitmq-queues.png)
 
 ### 주요 큐
 
@@ -121,6 +136,11 @@ Management UI에서 직접 메시지를 발행해봅니다:
 | User | 인증된 사용자 |
 | State | 연결 상태 (running) |
 | Channels | 열린 채널 수 |
+
+### Connections 탭 화면
+
+<!-- TODO: RabbitMQ Connections 탭 캡쳐 (연결된 클라이언트 목록이 보이는 상태) -->
+![RabbitMQ Connections 탭](images/rabbitmq-connections.png)
 
 **queue-service**가 연결되어 있어야 합니다.
 
