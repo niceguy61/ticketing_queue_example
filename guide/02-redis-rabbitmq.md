@@ -1,5 +1,9 @@
 # Redis + RabbitMQ 하이브리드
 
+[← 01. Redis ZSET](./01-redis-zset.md) | [03. Redis + SQS →](./03-redis-sqs.md)
+
+---
+
 Redis ZSET의 실시간 위치 추적과 RabbitMQ의 신뢰성 있는 메시지 처리를 결합한 아키텍처입니다.
 
 ## 개요

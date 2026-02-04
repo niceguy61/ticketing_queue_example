@@ -1,5 +1,9 @@
 # Redis ZSET 기반 대기열
 
+[← 00. 아키텍처 원칙](./00-architecture-principles.md) | [02. Redis + RabbitMQ →](./02-redis-rabbitmq.md)
+
+---
+
 Redis의 Sorted Set(ZSET)을 활용한 가장 기본적인 대기열 구현 방식입니다.
 
 ## 개요

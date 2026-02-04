@@ -1,5 +1,9 @@
 # Redis + Kafka 이벤트 스트리밍
 
+[← 03. Redis + SQS](./03-redis-sqs.md) | [05. 아키텍처 비교 →](./05-comparison.md)
+
+---
+
 Redis ZSET의 실시간 위치 추적과 Apache Kafka의 고성능 이벤트 스트리밍을 결합한 아키텍처입니다.
 
 ## 개요
