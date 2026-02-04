@@ -1,6 +1,6 @@
 # 아키텍처 비교 가이드
 
-[← 04. Redis + Kafka](./04-redis-kafka.md) | [00. 아키텍처 원칙 →](./00-architecture-principles.md)
+[← 04. Redis + Kafka](./04-redis-kafka.md) | [06. EKS 자체 운영 →](./06-eks-self-managed.md)
 
 ---
 
