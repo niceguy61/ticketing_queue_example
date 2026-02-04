@@ -79,6 +79,22 @@ http://localhost:80
 - 티켓팅 시스템 메인 페이지가 표시됩니다
 - 사용자 등록 또는 이벤트 선택 화면이 나타납니다
 
+### Simple 모드 화면
+
+Simple 모드에서는 사용자 등록 후 바로 로비 대기열에 진입합니다.
+
+<!-- TODO: Simple 모드 프론트엔드 메인 화면 캡쳐 (사용자 등록 폼이 보이는 상태) -->
+![프론트엔드 Simple 모드](images/frontend-simple-mode.png)
+
+### Advanced 모드 화면
+
+Advanced 모드에서는 로비 대기열 통과 후 이벤트를 선택할 수 있습니다.
+
+<!-- TODO: Advanced 모드 프론트엔드 화면 캡쳐 (이벤트 선택 화면 또는 "고급 모드" 배너가 보이는 상태) -->
+![프론트엔드 Advanced 모드](images/frontend-advanced-mode.png)
+
+> 💡 모드 변경 방법은 [11. Redis 모니터링](./11-monitor-redis.md#7-대기열-모드-변경하기)을 참고하세요.
+
 ---
 
 ## 5. 전체 서비스 상태 확인
