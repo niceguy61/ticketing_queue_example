@@ -7,7 +7,7 @@
 
 ## 아키텍처별 특성 비교 (5점 만점)
 
-![Architecture Radar Chart](images/architecture-radar-chart.svg)
+![Architecture Radar Chart](images/architecture-radar-chart.png)
 
 | 평가 항목 | ElastiCache 단독 | ElastiCache + Amazon MQ | ElastiCache + SQS |
 |-----------|:----------------:|:-----------------------:|:-----------------:|
@@ -21,12 +21,6 @@
 | **모니터링** | ⭐⭐⭐⭐ (4) | ⭐⭐⭐⭐ (4) | ⭐⭐⭐⭐⭐ (5) |
 | **총점** | **32/40** | **26/40** | **35/40** |
 
-### 점수 해석
-
-```
-ElastiCache 단독      ████████████████████████████████░░░░░░░░  32/40 (80%)
-ElastiCache+Amazon MQ ██████████████████████████░░░░░░░░░░░░░░  26/40 (65%)
-ElastiCache+SQS       ███████████████████████████████████░░░░░  35/40 (88%)
 ```
 
 | 아키텍처 | 강점 | 약점 |
