@@ -116,6 +116,11 @@ Management UI에서 직접 메시지를 발행해봅니다:
    ```
 4. **Publish message** 버튼 클릭
 
+### Publish message 화면
+
+<!-- TODO: RabbitMQ Publish message 섹션 캡쳐 (Payload 입력란과 Publish message 버튼이 보이는 상태) -->
+![RabbitMQ Publish message](images/rabbitmq-publish.png)
+
 ### 메시지 확인
 
 1. **Get messages** 섹션 펼치기
@@ -123,6 +128,11 @@ Management UI에서 직접 메시지를 발행해봅니다:
 3. **Get Message(s)** 버튼 클릭
 
 발행한 메시지 내용이 표시됩니다.
+
+### Get messages 화면
+
+<!-- TODO: RabbitMQ Get messages 섹션 캡쳐 (메시지 내용이 표시된 상태) -->
+![RabbitMQ Get messages](images/rabbitmq-get-messages.png)
 
 ---
 
