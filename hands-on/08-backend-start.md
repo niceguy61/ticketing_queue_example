@@ -58,6 +58,12 @@ ticketing-queue-service       Up (healthy)             0.0.0.0:3001->3001/tcp
 watch -n 2 'docker compose ps --format "table {{.Name}}\t{{.Status}}"'
 ```
 
+watch가 없다는 문구가 나온다면
+
+```bash
+brew install watch
+```
+
 > 💡 `Ctrl+C`로 watch 종료
 
 또는 수동으로 확인:
