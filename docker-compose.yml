@@ -1,0 +1,243 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: ticketing-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ticketing}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-ticketing}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ticketing-redis
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+
+  # Redis Commander - Redis 모니터링 UI
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: ticketing-redis-commander
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: ticketing-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-password}
+    ports:
+      - "${RABBITMQ_PORT:-15673}:5672"   # AMQP protocol (외부 15673 -> 내부 5672)
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672" # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+
+  # LocalStack - AWS Services Emulator (Optional - for local AWS development)
+  localstack:
+    image: localstack/localstack:latest
+    container_name: ticketing-localstack
+    environment:
+      SERVICES: ${LOCALSTACK_SERVICES:-sqs,sns}
+      DEBUG: ${LOCALSTACK_DEBUG:-0}
+      PERSISTENCE: 0
+    ports:
+      - "${LOCALSTACK_PORT:-4566}:4566"  # LocalStack Gateway
+      - "4510-4559:4510-4559"  # External services port range
+    networks:
+      - ticketing-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    profiles:
+      - localstack
+
+  # User Service
+  user-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/user-service/Dockerfile
+    container_name: ticketing-user-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-ticketing}
+      PORT: ${USER_SERVICE_PORT:-3003}
+      NODE_ENV: ${NODE_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      SESSION_EXPIRY_HOURS: ${SESSION_EXPIRY_HOURS:-24}
+      DB_MAX_CONNECTIONS: ${DB_MAX_CONNECTIONS:-20}
+      DB_IDLE_TIMEOUT_MS: ${DB_IDLE_TIMEOUT_MS:-30000}
+    ports:
+      - "${USER_SERVICE_PORT:-3003}:${USER_SERVICE_PORT:-3003}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:${USER_SERVICE_PORT:-3003}/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  # Ticket Service
+  ticket-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/ticket-service/Dockerfile
+    container_name: ticketing-ticket-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-ticketing}
+      PORT: ${TICKET_SERVICE_PORT:-3002}
+      NODE_ENV: ${NODE_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      TICKET_EXPIRY_MINUTES: ${TICKET_EXPIRY_MINUTES:-30}
+      DB_MAX_CONNECTIONS: ${DB_MAX_CONNECTIONS:-20}
+      DB_IDLE_TIMEOUT_MS: ${DB_IDLE_TIMEOUT_MS:-30000}
+    ports:
+      - "${TICKET_SERVICE_PORT:-3002}:${TICKET_SERVICE_PORT:-3002}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:${TICKET_SERVICE_PORT:-3002}/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  # Queue Service
+  queue-service:
+    build:
+      context: ./backend
+      dockerfile: ./services/queue-service/Dockerfile
+    container_name: ticketing-queue-service
+    environment:
+      PORT: ${QUEUE_SERVICE_PORT:-3001}
+      NODE_ENV: ${NODE_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      QUEUE_MODE: ${QUEUE_MODE:-advanced}
+      LOBBY_CAPACITY: ${LOBBY_CAPACITY:-1}
+      PROCESSING_RATE: ${PROCESSING_RATE:-10}
+      REDIS_URL: redis://redis:6379
+      REDIS_MAX_RETRIES: ${REDIS_MAX_RETRIES:-3}
+      REDIS_RETRY_DELAY_MS: ${REDIS_RETRY_DELAY_MS:-1000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-ticketing}
+      QUEUE_PROVIDER: ${QUEUE_PROVIDER:-redis}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ENDPOINT: ${AWS_ENDPOINT:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      RABBITMQ_URL: ${RABBITMQ_URL:-}
+      TICKET_SERVICE_URL: http://ticket-service:${TICKET_SERVICE_PORT:-3002}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    ports:
+      - "${QUEUE_SERVICE_PORT:-3001}:${QUEUE_SERVICE_PORT:-3001}"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      ticket-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:${QUEUE_SERVICE_PORT:-3001}/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_QUEUE_SERVICE_URL: ${VITE_QUEUE_SERVICE_URL:-http://localhost:3001}
+        VITE_TICKET_SERVICE_URL: ${VITE_TICKET_SERVICE_URL:-http://localhost:3002}
+        VITE_USER_SERVICE_URL: ${VITE_USER_SERVICE_URL:-http://localhost:3003}
+    container_name: ticketing-frontend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - queue-service
+      - ticket-service
+      - user-service
+    networks:
+      - ticketing-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  rabbitmq-data:
+    driver: local
+  localstack-data:
+    driver: local
+
+networks:
+  ticketing-network:
+    driver: bridge
+    name: ticketing-network

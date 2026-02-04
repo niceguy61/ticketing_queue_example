@@ -1,0 +1,87 @@
+.queue-status {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.queue-status-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.queue-status-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.queue-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.queue-status-item {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.queue-status-item.highlight {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.queue-status-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.queue-status-item.highlight .queue-status-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.queue-status-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.queue-status-value.large {
+  font-size: 32px;
+}
+
+.queue-status-item.highlight .queue-status-value {
+  color: white;
+}
+
+.queue-status-progress {
+  margin-top: 20px;
+}
+
+.queue-status-progress-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.queue-status-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.queue-status-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}

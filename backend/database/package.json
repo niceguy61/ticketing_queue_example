@@ -1,0 +1,19 @@
+{
+  "name": "@ticketing-queue/database",
+  "version": "1.0.0",
+  "description": "Database connection and schema management for ticketing queue system",
+  "main": "connection.ts",
+  "scripts": {
+    "test": "vitest --run"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "fast-check": "^3.15.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  }
+}
