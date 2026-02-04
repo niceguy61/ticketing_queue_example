@@ -1,0 +1,121 @@
+# 04. 환경변수 설정
+
+[← 03. 프로젝트 클론](./03-project-clone.md) | [목차](./README.md) | [05. 인프라 기동 →](./05-infra-start.md)
+
+---
+
+⏱️ **예상 소요 시간**: 3분
+
+## 목표
+
+`.env` 파일을 생성하고 환경변수를 설정합니다.
+
+---
+
+## 1. 환경변수 파일 생성
+
+템플릿을 복사하여 `.env` 파일을 생성합니다:
+
+```bash
+cp .env.example .env
+```
+
+---
+
+## 2. 기본 설정 확인
+
+생성된 `.env` 파일을 확인합니다:
+
+```bash
+cat .env | head -50
+```
+
+핸즈온에서는 **기본값 그대로 사용**해도 됩니다.
+
+---
+
+## 3. 주요 환경변수 설명
+
+### 데이터베이스 (PostgreSQL)
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `POSTGRES_DB` | ticketing | 데이터베이스 이름 |
+| `POSTGRES_USER` | admin | DB 사용자 |
+| `POSTGRES_PASSWORD` | password | DB 비밀번호 |
+| `POSTGRES_PORT` | 5432 | 포트 |
+
+### Redis
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `REDIS_PORT` | 6379 | Redis 포트 |
+
+### RabbitMQ
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `RABBITMQ_USER` | admin | RabbitMQ 사용자 |
+| `RABBITMQ_PASSWORD` | password | RabbitMQ 비밀번호 |
+| `RABBITMQ_PORT` | 15673 | AMQP 포트 (외부) |
+| `RABBITMQ_MGMT_PORT` | 15672 | 관리 UI 포트 |
+
+### 서비스 포트
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `QUEUE_SERVICE_PORT` | 3001 | Queue Service |
+| `TICKET_SERVICE_PORT` | 3002 | Ticket Service |
+| `USER_SERVICE_PORT` | 3003 | User Service |
+| `FRONTEND_PORT` | 80 | Frontend |
+
+---
+
+## 4. 포트 충돌 확인
+
+기본 포트가 이미 사용 중인지 확인합니다:
+
+```bash
+# 주요 포트 사용 여부 확인
+lsof -i :5432  # PostgreSQL
+lsof -i :6379  # Redis
+lsof -i :15672 # RabbitMQ Management
+lsof -i :3001  # Queue Service
+lsof -i :3002  # Ticket Service
+lsof -i :3003  # User Service
+lsof -i :80    # Frontend
+```
+
+**출력이 없으면** 해당 포트가 사용 가능합니다.
+
+**포트가 사용 중이면** `.env` 파일에서 해당 포트를 변경하세요:
+
+```bash
+# 예: PostgreSQL 포트를 5433으로 변경
+# .env 파일 편집
+POSTGRES_PORT=5433
+```
+
+---
+
+## 5. 환경변수 로드 확인
+
+```bash
+# .env 파일이 정상적으로 읽히는지 확인
+source .env && echo "POSTGRES_DB=$POSTGRES_DB"
+```
+
+**예상 출력:**
+```
+POSTGRES_DB=ticketing
+```
+
+---
+
+## ✅ 체크포인트
+
+다음을 확인하세요:
+
+- [ ] `.env` 파일이 생성되었다
+- [ ] 주요 포트(5432, 6379, 15672, 3001-3003, 80)가 사용 가능하다
+- [ ] 포트 충돌이 있다면 `.env`에서 변경했다
+
+---
+
+[← 03. 프로젝트 클론](./03-project-clone.md) | [목차](./README.md) | [05. 인프라 기동 →](./05-infra-start.md)

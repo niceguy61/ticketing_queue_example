@@ -1,0 +1,191 @@
+# 09. 백엔드 동작 확인
+
+[← 08. 백엔드 기동](./08-backend-start.md) | [목차](./README.md) | [10. 프론트엔드 기동 →](./10-frontend-start.md)
+
+---
+
+⏱️ **예상 소요 시간**: 3분
+
+## 목표
+
+각 백엔드 서비스의 Health API와 기본 API를 호출하여 정상 동작을 확인합니다.
+
+---
+
+## 1. Health Check API
+
+### User Service
+
+```bash
+curl -s http://localhost:3003/health | jq
+```
+
+**예상 출력:**
+```json
+{
+  "status": "ok",
+  "service": "user-service",
+  "timestamp": "2024-..."
+}
+```
+
+### Ticket Service
+
+```bash
+curl -s http://localhost:3002/health | jq
+```
+
+**예상 출력:**
+```json
+{
+  "status": "ok",
+  "service": "ticket-service",
+  "timestamp": "2024-..."
+}
+```
+
+### Queue Service
+
+```bash
+curl -s http://localhost:3001/health | jq
+```
+
+**예상 출력:**
+```json
+{
+  "status": "ok",
+  "service": "queue-service",
+  "timestamp": "2024-..."
+}
+```
+
+> 💡 `jq`가 없으면 `| jq` 부분을 제거하고 실행하세요.
+
+---
+
+## 2. User Service API 테스트
+
+### 사용자 생성
+
+```bash
+curl -s -X POST http://localhost:3003/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "테스트유저", "email": "test@example.com"}' | jq
+```
+
+**예상 출력:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "...",
+    "name": "테스트유저",
+    "email": "test@example.com",
+    "createdAt": "..."
+  }
+}
+```
+
+### 사용자 목록 조회
+
+```bash
+curl -s http://localhost:3003/api/users | jq
+```
+
+---
+
+## 3. Ticket Service API 테스트
+
+### 티켓 목록 조회
+
+```bash
+curl -s http://localhost:3002/api/tickets | jq
+```
+
+**예상 출력:**
+```json
+{
+  "success": true,
+  "data": []
+}
+```
+
+---
+
+## 4. Queue Service API 테스트
+
+### 대기열 상태 조회
+
+```bash
+curl -s http://localhost:3001/api/queue/status | jq
+```
+
+**예상 출력:**
+```json
+{
+  "success": true,
+  "data": {
+    "mode": "advanced",
+    "lobbyCapacity": 1,
+    "processingRate": 10
+  }
+}
+```
+
+---
+
+## 5. 서비스 간 통신 확인
+
+Queue Service가 Ticket Service와 통신하는지 확인:
+
+```bash
+# Queue Service 로그에서 Ticket Service 연결 확인
+docker compose logs queue-service | grep -i "ticket"
+```
+
+---
+
+## 6. 간단한 통합 테스트
+
+### 대기열 진입 테스트
+
+```bash
+# 1. 사용자 생성 (이미 생성했다면 생략)
+USER_RESPONSE=$(curl -s -X POST http://localhost:3003/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "QueueTest", "email": "queue@test.com"}')
+
+USER_ID=$(echo $USER_RESPONSE | jq -r '.data.id')
+echo "Created User ID: $USER_ID"
+
+# 2. 대기열 진입
+curl -s -X POST http://localhost:3001/api/queue/join \
+  -H "Content-Type: application/json" \
+  -d "{\"userId\": \"$USER_ID\"}" | jq
+```
+
+**예상 출력:**
+```json
+{
+  "success": true,
+  "data": {
+    "position": 1,
+    "estimatedWaitTime": "..."
+  }
+}
+```
+
+---
+
+## ✅ 체크포인트
+
+다음을 확인하세요:
+
+- [ ] 3개 서비스의 `/health` API가 모두 `"status": "ok"` 반환
+- [ ] User Service: 사용자 생성 API 정상 동작
+- [ ] Ticket Service: 티켓 목록 조회 API 정상 동작
+- [ ] Queue Service: 대기열 상태 조회 API 정상 동작
+
+---
+
+[← 08. 백엔드 기동](./08-backend-start.md) | [목차](./README.md) | [10. 프론트엔드 기동 →](./10-frontend-start.md)
