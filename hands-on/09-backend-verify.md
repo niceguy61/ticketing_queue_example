@@ -20,6 +20,12 @@
 curl -s http://localhost:3003/health | jq
 ```
 
+jq library 설치 안되어 있으면
+
+```bash
+brew install jq
+```
+
 **예상 출력:**
 ```json
 {
@@ -65,10 +71,10 @@ curl -s http://localhost:3001/health | jq
 
 ## 2. User Service API 테스트
 
-### 사용자 생성
+### 사용자 등록
 
 ```bash
-curl -s -X POST http://localhost:3003/api/users \
+curl -s -X POST http://localhost:3003/api/users/register \
   -H "Content-Type: application/json" \
   -d '{"name": "테스트유저", "email": "test@example.com"}' | jq
 ```
@@ -86,20 +92,22 @@ curl -s -X POST http://localhost:3003/api/users \
 }
 ```
 
-### 사용자 목록 조회
+### 사용자 조회
 
 ```bash
-curl -s http://localhost:3003/api/users | jq
+# 위에서 생성된 사용자 ID로 조회
+curl -s http://localhost:3003/api/users/<user-id> | jq
 ```
 
 ---
 
 ## 3. Ticket Service API 테스트
 
-### 티켓 목록 조회
+### 사용자 티켓 조회
 
 ```bash
-curl -s http://localhost:3002/api/tickets | jq
+# 특정 사용자의 티켓 목록 조회
+curl -s http://localhost:3002/api/tickets/user/<user-id> | jq
 ```
 
 **예상 출력:**
@@ -114,10 +122,10 @@ curl -s http://localhost:3002/api/tickets | jq
 
 ## 4. Queue Service API 테스트
 
-### 대기열 상태 조회
+### 큐 모드 조회
 
 ```bash
-curl -s http://localhost:3001/api/queue/status | jq
+curl -s http://localhost:3001/api/queue/mode | jq
 ```
 
 **예상 출력:**
@@ -125,8 +133,24 @@ curl -s http://localhost:3001/api/queue/status | jq
 {
   "success": true,
   "data": {
-    "mode": "advanced",
-    "lobbyCapacity": 1,
+    "mode": "advanced"
+  }
+}
+```
+
+### 로비 대기열 상태 조회
+
+```bash
+curl -s http://localhost:3001/api/queue/lobby/status | jq
+```
+
+**예상 출력:**
+```json
+{
+  "success": true,
+  "data": {
+    "queueSize": 0,
+    "capacity": 1,
     "processingRate": 10
   }
 }
