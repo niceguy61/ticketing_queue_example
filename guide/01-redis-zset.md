@@ -41,6 +41,84 @@ flowchart TB
 - **User Service**: 사용자 세션, 캐시 관리
 - 모든 서비스가 **동일한 Redis 인스턴스**에 연결
 
+## 시퀀스 다이어그램
+
+### 대기열 진입 → 티켓 발급 흐름
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant QS as Queue Service
+    participant R as Redis
+    participant TS as Ticket Service
+    participant DB as PostgreSQL
+
+    rect rgb(230, 245, 255)
+        Note over C,R: 1. 대기열 진입
+        C->>QS: POST /queue/join
+        QS->>R: ZADD queue:lobby {score: timestamp, value: userId}
+        R-->>QS: OK
+        QS->>R: ZRANK queue:lobby userId
+        R-->>QS: position: 42
+        QS-->>C: { position: 43, estimatedWait: "5분" }
+    end
+
+    rect rgb(255, 245, 230)
+        Note over C,R: 2. 실시간 위치 업데이트 (폴링)
+        loop 매 3초
+            C->>QS: GET /queue/position
+            QS->>R: ZRANK queue:lobby userId
+            R-->>QS: position: 38
+            QS-->>C: { position: 39 }
+        end
+    end
+
+    rect rgb(230, 255, 230)
+        Note over QS,DB: 3. 차례 도달 시 티켓 발급
+        QS->>R: ZPOPMIN queue:lobby
+        R-->>QS: { userId, score }
+        QS->>TS: POST /tickets (userId)
+        TS->>DB: INSERT ticket
+        DB-->>TS: ticket created
+        TS-->>QS: { ticketId, expiresAt }
+        QS-->>C: 🎫 { ticket, message: "차례입니다!" }
+    end
+```
+
+### 동시 접속 처리 흐름
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C1 as User A
+    participant C2 as User B
+    participant C3 as User C
+    participant QS as Queue Service
+    participant R as Redis
+
+    Note over C1,R: 동시에 3명이 대기열 진입 시도
+    
+    par 동시 요청
+        C1->>QS: POST /queue/join (userA)
+        C2->>QS: POST /queue/join (userB)
+        C3->>QS: POST /queue/join (userC)
+    end
+
+    Note over QS,R: Redis ZADD는 원자적 연산
+    QS->>R: ZADD queue:lobby 1000 userA
+    QS->>R: ZADD queue:lobby 1001 userB
+    QS->>R: ZADD queue:lobby 1002 userC
+    
+    R-->>QS: 각각 성공
+    
+    QS-->>C1: position: 1
+    QS-->>C2: position: 2
+    QS-->>C3: position: 3
+
+    Note over C1,R: timestamp 순서대로 정확히 정렬됨
+```
+
 ## 핵심 개념
 
 ### ZSET이란?

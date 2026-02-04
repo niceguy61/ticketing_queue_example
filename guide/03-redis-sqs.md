@@ -63,6 +63,178 @@ flowchart TB
 - **Lambda Workers**: SQS 트리거로 자동 스케일링
 - **SNS/SES**: 푸시 알림, 이메일 발송 통합
 
+## 시퀀스 다이어그램
+
+### 대기열 진입 → Lambda 처리 → 알림 전체 흐름
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant ALB as ALB
+    participant QS as Queue Service (ECS)
+    participant R as ElastiCache
+    participant SQS as SQS
+    participant L1 as TicketProcessor Lambda
+    participant TS as Ticket Service (ECS)
+    participant RDS as RDS
+    participant L2 as NotifySender Lambda
+    participant SNS as SNS
+
+    rect rgb(230, 245, 255)
+        Note over C,R: 1. 대기열 진입
+        C->>ALB: POST /queue/join
+        ALB->>QS: forward
+        QS->>R: ZADD queue:lobby
+        R-->>QS: OK
+        QS-->>C: { position: 43 }
+    end
+
+    rect rgb(255, 245, 230)
+        Note over QS,SQS: 2. 차례 도달 → SQS 발행
+        QS->>R: ZPOPMIN queue:lobby
+        R-->>QS: { userId }
+        QS->>SQS: SendMessage(ticket-queue)
+        SQS-->>QS: MessageId
+    end
+
+    rect rgb(230, 255, 230)
+        Note over SQS,RDS: 3. Lambda 자동 트리거
+        SQS->>L1: trigger (batch)
+        L1->>TS: POST /tickets/issue
+        TS->>RDS: INSERT ticket
+        RDS-->>TS: ticketId
+        TS-->>L1: { ticketId }
+        Note over L1: 성공 시 자동 삭제
+    end
+
+    rect rgb(255, 230, 245)
+        Note over TS,SNS: 4. 알림 발송
+        TS->>SQS: SendMessage(notification-queue)
+        SQS->>L2: trigger
+        L2->>SNS: publish(userId, "티켓 발급!")
+        SNS-->>C: 🔔 푸시 알림
+    end
+```
+
+### Lambda 동시성 자동 스케일링
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant SQS as SQS (1000 messages)
+    participant AWS as AWS Lambda Service
+    participant L1 as Lambda Instance 1
+    participant L2 as Lambda Instance 2
+    participant L3 as Lambda Instance 3
+    participant Ln as Lambda Instance N...
+
+    Note over SQS,Ln: 메시지 급증 시 자동 스케일 아웃
+
+    SQS->>AWS: 1000 messages pending
+    AWS->>AWS: 동시성 계산 (배치 크기, 처리 시간 기반)
+    
+    par 자동 스케일 아웃
+        AWS->>L1: invoke (messages 1-10)
+        AWS->>L2: invoke (messages 11-20)
+        AWS->>L3: invoke (messages 21-30)
+        AWS->>Ln: invoke (messages ...)
+    end
+
+    L1-->>SQS: batch complete (auto-delete)
+    L2-->>SQS: batch complete (auto-delete)
+    L3-->>SQS: batch complete (auto-delete)
+
+    Note over SQS,Ln: 메시지 감소 시 자동 스케일 인
+    SQS->>AWS: 10 messages pending
+    AWS->>L1: invoke (messages 1-10)
+    Note over L2,Ln: 유휴 인스턴스 자동 종료
+```
+
+### DLQ 및 재처리 흐름
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant SQS as ticket-queue
+    participant L as Lambda
+    participant TS as Ticket Service
+    participant DLQ as ticket-dlq
+    participant CW as CloudWatch
+    participant Admin as 운영자
+
+    rect rgb(255, 230, 230)
+        Note over SQS,TS: 1차 시도 실패
+        SQS->>L: trigger
+        L->>TS: POST /tickets/issue
+        TS--xL: ❌ Error
+        L--xSQS: throw Error
+        Note over SQS: 가시성 타임아웃 후 재시도
+    end
+
+    rect rgb(255, 240, 230)
+        Note over SQS,TS: 2차 시도 실패
+        SQS->>L: trigger (retry)
+        L->>TS: POST /tickets/issue
+        TS--xL: ❌ Error
+        L--xSQS: throw Error
+    end
+
+    rect rgb(255, 250, 230)
+        Note over SQS,TS: 3차 시도 실패 (maxReceiveCount 도달)
+        SQS->>L: trigger (retry)
+        L->>TS: POST /tickets/issue
+        TS--xL: ❌ Error
+        L--xSQS: throw Error
+    end
+
+    rect rgb(230, 230, 230)
+        Note over SQS,Admin: DLQ 이동 및 알람
+        SQS->>DLQ: move message (RedrivePolicy)
+        DLQ->>CW: metric: ApproximateNumberOfMessages
+        CW->>Admin: 🚨 Alarm: DLQ messages > 0
+    end
+
+    rect rgb(230, 255, 230)
+        Note over Admin,SQS: 수동 재처리
+        Admin->>DLQ: StartMessageMoveTask
+        DLQ->>SQS: redrive messages
+        Note over SQS: 다시 처리 시도
+    end
+```
+
+### FIFO 큐 순서 보장
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant QS as Queue Service
+    participant SQS as SQS FIFO
+    participant L as Lambda
+
+    Note over QS,L: MessageGroupId로 순서 보장
+
+    QS->>SQS: SendMessage(GroupId: "event-A", msg1)
+    QS->>SQS: SendMessage(GroupId: "event-A", msg2)
+    QS->>SQS: SendMessage(GroupId: "event-B", msg3)
+    QS->>SQS: SendMessage(GroupId: "event-A", msg4)
+
+    Note over SQS: event-A: msg1 → msg2 → msg4 순서 보장
+    Note over SQS: event-B: msg3 독립 처리
+
+    SQS->>L: msg1 (event-A)
+    L-->>SQS: success
+    SQS->>L: msg2 (event-A)
+    
+    par 다른 그룹은 병렬 처리
+        SQS->>L: msg3 (event-B)
+    end
+    
+    L-->>SQS: success (msg2)
+    L-->>SQS: success (msg3)
+    SQS->>L: msg4 (event-A)
+```
+
 ## AWS SQS란?
 
 - **Simple Queue Service**: AWS의 완전 관리형 메시지 큐 서비스

@@ -58,6 +58,140 @@ flowchart TB
 - **Notification Service**: 알림 큐 구독하여 푸시/이메일 발송
 - **Workers**: 각 큐별 전용 워커가 메시지 처리
 
+## 시퀀스 다이어그램
+
+### 대기열 진입 → 티켓 발급 → 알림 전체 흐름
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant QS as Queue Service
+    participant R as Redis
+    participant MQ as RabbitMQ
+    participant TW as Ticket Worker
+    participant TS as Ticket Service
+    participant NW as Notify Worker
+    participant NS as Notification
+
+    rect rgb(230, 245, 255)
+        Note over C,R: 1. 대기열 진입 (Redis)
+        C->>QS: POST /queue/join
+        QS->>R: ZADD queue:lobby
+        R-->>QS: OK
+        QS->>R: ZRANK queue:lobby
+        R-->>QS: position: 42
+        QS-->>C: { position: 43 }
+    end
+
+    rect rgb(255, 245, 230)
+        Note over QS,MQ: 2. 차례 도달 시 이벤트 발행
+        QS->>R: ZPOPMIN queue:lobby
+        R-->>QS: { userId }
+        QS->>MQ: publish(ticket-exchange, ticket.issue, {userId})
+        MQ-->>QS: confirmed
+    end
+
+    rect rgb(230, 255, 230)
+        Note over MQ,TS: 3. Worker가 티켓 발급 처리
+        MQ->>TW: consume(ticket-issue-queue)
+        TW->>TS: POST /tickets/issue
+        TS-->>TW: { ticketId }
+        TW->>MQ: ACK
+    end
+
+    rect rgb(255, 230, 245)
+        Note over TS,NS: 4. 티켓 발급 완료 → 알림 발송
+        TS->>MQ: publish(ticket-exchange, ticket.issued, {userId, ticketId})
+        MQ->>NW: consume(notification-queue)
+        NW->>NS: sendPush(userId, "티켓 발급 완료!")
+        NS-->>NW: sent
+        NW->>MQ: ACK
+        NS-->>C: 🔔 푸시 알림
+    end
+```
+
+### 실패 시 재시도 및 DLQ 흐름
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MQ as RabbitMQ
+    participant TW as Ticket Worker
+    participant TS as Ticket Service
+    participant DLQ as Dead Letter Queue
+    participant Admin as 운영자
+
+    rect rgb(255, 230, 230)
+        Note over MQ,TS: 1차 시도 - 실패
+        MQ->>TW: consume(message)
+        TW->>TS: POST /tickets/issue
+        TS--xTW: ❌ 500 Error (DB 장애)
+        TW->>MQ: NACK (requeue=true)
+    end
+
+    rect rgb(255, 240, 230)
+        Note over MQ,TS: 2차 시도 - 실패
+        MQ->>TW: consume(message) [재전달]
+        TW->>TS: POST /tickets/issue
+        TS--xTW: ❌ 500 Error
+        TW->>MQ: NACK (requeue=true)
+    end
+
+    rect rgb(255, 250, 230)
+        Note over MQ,TS: 3차 시도 - 실패
+        MQ->>TW: consume(message) [재전달]
+        TW->>TS: POST /tickets/issue
+        TS--xTW: ❌ 500 Error
+        TW->>MQ: NACK (requeue=false)
+    end
+
+    rect rgb(230, 230, 230)
+        Note over MQ,Admin: DLQ로 이동 → 운영자 확인
+        MQ->>DLQ: route to DLQ (x-death header 포함)
+        DLQ-->>Admin: 🚨 알람: DLQ 메시지 발생
+        Admin->>DLQ: 원인 분석 후 재처리 또는 폐기
+    end
+```
+
+### 여러 Worker 부하 분산
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant MQ as RabbitMQ
+    participant W1 as Worker 1
+    participant W2 as Worker 2
+    participant W3 as Worker 3
+    participant TS as Ticket Service
+
+    Note over MQ,TS: prefetch=1 설정으로 공정한 분배
+
+    par 동시 처리
+        MQ->>W1: message 1
+        MQ->>W2: message 2
+        MQ->>W3: message 3
+    end
+
+    W1->>TS: process message 1
+    W2->>TS: process message 2
+    W3->>TS: process message 3
+
+    TS-->>W1: done
+    W1->>MQ: ACK
+
+    Note over MQ,W1: W1이 먼저 완료 → 다음 메시지 받음
+    MQ->>W1: message 4
+
+    TS-->>W2: done
+    W2->>MQ: ACK
+    MQ->>W2: message 5
+
+    TS-->>W3: done
+    W3->>MQ: ACK
+    MQ->>W3: message 6
+```
+
 ## 역할 분담
 
 ### Redis ZSET
