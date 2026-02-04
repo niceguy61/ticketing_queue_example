@@ -94,7 +94,46 @@ POSTGRES_PORT=5433
 
 ---
 
-## 5. 환경변수 로드 확인
+## 5. 환경변수 변경 시 주의사항
+
+> ⚠️ **중요**: `.env` 파일을 수정한 후에는 단순히 `docker-compose up -d`만 실행하면 변경이 반영되지 않습니다!
+
+### 백엔드 서비스 환경변수 변경 시
+
+```bash
+# 컨테이너 강제 재생성 필요
+docker-compose up -d --force-recreate queue-service
+```
+
+### 프론트엔드 환경변수 변경 시
+
+프론트엔드는 빌드 시점에 환경변수가 번들에 포함되므로 **이미지 재빌드**가 필요합니다:
+
+```bash
+# 이미지 재빌드 필수
+docker-compose up -d --build frontend
+```
+
+### 전체 재시작 (확실한 방법)
+
+```bash
+docker-compose down
+docker-compose up -d --build
+```
+
+### 변경 확인 방법
+
+```bash
+# 컨테이너 내부 환경변수 확인
+docker exec ticketing-queue-service printenv | grep QUEUE_MODE
+
+# API로 확인 (Queue Service)
+curl -s http://localhost:3001/api/queue/mode | jq
+```
+
+---
+
+## 6. 환경변수 로드 확인
 
 ```bash
 # .env 파일이 정상적으로 읽히는지 확인
@@ -115,6 +154,7 @@ POSTGRES_DB=ticketing
 - [ ] `.env` 파일이 생성되었다
 - [ ] 주요 포트(5432, 6379, 15672, 3001-3003, 80)가 사용 가능하다
 - [ ] 포트 충돌이 있다면 `.env`에서 변경했다
+- [ ] 환경변수 변경 시 `--force-recreate` 또는 `--build` 옵션이 필요함을 이해했다
 
 ---
 

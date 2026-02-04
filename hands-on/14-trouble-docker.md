@@ -119,6 +119,63 @@ Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docke
 
 ---
 
+## 환경변수 변경이 반영 안 될 때
+
+### 증상: `.env` 파일 수정 후 `docker-compose up -d` 했는데 이전 값 그대로
+
+예: `QUEUE_MODE=advanced`로 변경했는데 계속 `simple`로 동작
+
+### 원인
+
+Docker Compose는 기존 컨테이너가 있으면 재사용합니다. `.env` 변경만으로는 컨테이너가 재생성되지 않습니다.
+
+### 해결 방법
+
+1. **백엔드 서비스: 컨테이너 강제 재생성**
+   ```bash
+   # 특정 서비스만 재생성
+   docker-compose up -d --force-recreate queue-service
+   
+   # 또는 전체 재생성
+   docker-compose up -d --force-recreate
+   ```
+
+2. **프론트엔드: 이미지 재빌드 필수**
+   
+   프론트엔드(Vite)는 빌드 시점에 환경변수가 번들에 포함됩니다:
+   ```bash
+   # 이미지 재빌드
+   docker-compose up -d --build frontend
+   ```
+
+3. **확실한 방법: 전체 재시작**
+   ```bash
+   docker-compose down
+   docker-compose up -d --build
+   ```
+
+### 변경 확인 방법
+
+```bash
+# 컨테이너 내부 환경변수 확인
+docker exec ticketing-queue-service printenv | grep QUEUE_MODE
+
+# API로 확인
+curl -s http://localhost:3001/api/queue/mode | jq
+```
+
+**예상 출력:**
+```json
+{
+  "success": true,
+  "data": {
+    "mode": "advanced"
+  }
+}
+```
+
+---
+
 ## Docker Compose 버전 문제
 
 ### 증상: "version is obsolete" 경고

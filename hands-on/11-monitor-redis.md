@@ -26,7 +26,50 @@ http://localhost:8081
 
 ---
 
-## 2. 대기열 데이터 확인
+## 2. 테스트 데이터 생성
+
+> ⚠️ **처음 접속 시 키가 없나요?**  
+> 서비스를 막 시작한 상태에서는 아직 대기열에 아무도 진입하지 않아 Redis에 키가 없습니다.  
+> 아래 명령으로 테스트 데이터를 먼저 추가해보세요.
+
+### 대기열에 테스트 사용자 추가
+
+```bash
+# 테스트 사용자 3명 추가
+docker exec -it ticketing-redis redis-cli zadd lobby:queue $(date +%s)001 "test-user-1"
+docker exec -it ticketing-redis redis-cli zadd lobby:queue $(date +%s)002 "test-user-2"
+docker exec -it ticketing-redis redis-cli zadd lobby:queue $(date +%s)003 "test-user-3"
+```
+
+**예상 출력:**
+```
+(integer) 1
+(integer) 1
+(integer) 1
+```
+
+### 데이터 확인
+
+```bash
+# 대기열 확인
+docker exec -it ticketing-redis redis-cli zrange lobby:queue 0 -1 withscores
+```
+
+**예상 출력:**
+```
+1) "test-user-1"
+2) "1738600000001"
+3) "test-user-2"
+4) "1738600000002"
+5) "test-user-3"
+6) "1738600000003"
+```
+
+> 💡 **Redis Commander 새로고침**: 브라우저에서 `F5` 또는 새로고침 버튼을 누르면 추가된 키가 표시됩니다.
+
+---
+
+## 3. 대기열 데이터 확인 (웹 UI)
 
 ### 키 목록 확인
 
@@ -47,7 +90,7 @@ http://localhost:8081
 
 ---
 
-## 3. CLI로 Redis 데이터 확인
+## 4. CLI로 Redis 데이터 확인
 
 ### 모든 키 조회
 
@@ -78,7 +121,7 @@ docker exec -it ticketing-redis redis-cli zrank lobby:queue "<user-id>"
 
 ---
 
-## 4. 실시간 모니터링
+## 5. 실시간 모니터링
 
 ### Redis MONITOR 명령
 
@@ -113,23 +156,9 @@ docker exec -it ticketing-redis redis-cli info keyspace
 
 ---
 
-## 5. 테스트 데이터 생성
+## 6. 테스트 데이터 삭제
 
-대기열에 테스트 데이터를 추가해봅니다:
-
-```bash
-# 테스트 사용자 3명 추가
-docker exec -it ticketing-redis redis-cli zadd lobby:queue $(date +%s)001 "test-user-1"
-docker exec -it ticketing-redis redis-cli zadd lobby:queue $(date +%s)002 "test-user-2"
-docker exec -it ticketing-redis redis-cli zadd lobby:queue $(date +%s)003 "test-user-3"
-
-# 대기열 확인
-docker exec -it ticketing-redis redis-cli zrange lobby:queue 0 -1 withscores
-```
-
-**Redis Commander에서 새로고침**하면 추가된 데이터가 표시됩니다.
-
-### 테스트 데이터 삭제
+테스트가 끝나면 데이터를 정리합니다:
 
 ```bash
 # 테스트 데이터 삭제
@@ -138,7 +167,103 @@ docker exec -it ticketing-redis redis-cli zrem lobby:queue "test-user-1" "test-u
 
 ---
 
-## 6. 주요 Redis 명령어 정리
+## 7. 대기열 모드 변경하기
+
+> ⚠️ **중요**: 대기열 설정은 Redis에 저장됩니다. `.env` 파일의 `QUEUE_MODE`를 변경해도 이미 Redis에 저장된 설정이 우선 적용됩니다.
+
+### 현재 설정 확인
+
+```bash
+docker exec -it ticketing-redis redis-cli hgetall queue:config
+```
+
+**예상 출력:**
+```
+1) "mode"
+2) "simple"
+3) "lobbyCapacity"
+4) "1"
+5) "processingRate"
+6) "10"
+```
+
+### 모드 변경 (simple → advanced)
+
+```bash
+# 방법 1: mode만 변경
+docker exec -it ticketing-redis redis-cli hset queue:config mode advanced
+
+# 방법 2: 설정 전체 삭제 후 서비스 재시작 (환경변수로 다시 초기화)
+docker exec -it ticketing-redis redis-cli del queue:config
+docker-compose restart queue-service
+```
+
+### 변경 확인
+
+```bash
+# Redis 설정 확인
+docker exec -it ticketing-redis redis-cli hget queue:config mode
+
+# API로 확인
+curl -s http://localhost:3001/api/queue/mode | jq
+```
+
+**예상 출력:**
+```json
+{
+  "success": true,
+  "data": {
+    "mode": "advanced"
+  }
+}
+```
+
+> 💡 프론트엔드 새로고침하면 "고급 모드" 배너가 표시됩니다.
+
+---
+
+## 8. Advanced 모드: 이벤트 동기화
+
+> ⚠️ **중요**: Advanced 모드에서는 DB의 이벤트가 Redis에 동기화되어야 이벤트 목록이 표시됩니다.  
+> 이벤트 동기화는 **queue-service 시작 시점**에 mode가 `advanced`일 때만 실행됩니다.
+
+### 이벤트가 안 보일 때
+
+mode를 `advanced`로 변경한 후에도 이벤트가 안 보인다면, queue-service를 재시작해야 합니다:
+
+```bash
+# queue-service 재시작
+docker-compose restart queue-service
+
+# 로그에서 이벤트 동기화 확인
+docker-compose logs queue-service | grep -i "event sync"
+```
+
+**예상 로그:**
+```
+Starting event synchronization from DB to Redis...
+Event synced to Redis { eventId: '...', name: '콘서트 A', capacity: 100 }
+Event synchronization completed { syncedCount: 3 }
+```
+
+### 한 번에 설정 초기화 + 이벤트 동기화
+
+```bash
+# Redis 설정 삭제 → 재시작 시 환경변수로 초기화 + 이벤트 동기화
+docker exec -it ticketing-redis redis-cli del queue:config
+docker-compose restart queue-service
+```
+
+### 동기화된 이벤트 확인
+
+```bash
+# Redis에 저장된 이벤트 설정 확인
+docker exec -it ticketing-redis redis-cli hget queue:config ticketEvents
+```
+
+---
+
+## 9. 주요 Redis 명령어 정리
 
 | 명령어 | 설명 |
 |--------|------|
