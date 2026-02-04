@@ -24,6 +24,25 @@ http://localhost:8081
 - 좌측: 데이터베이스 및 키 목록
 - 우측: 선택한 키의 상세 정보
 
+### Redis Commander 메인 화면
+
+<!-- TODO: Redis Commander 메인 화면 캡쳐 (키 목록이 보이는 상태) -->
+![Redis Commander 메인 화면](./images/redis-commander-main.png)
+
+### ZSET 데이터 상세 보기
+
+`lobby:queue` 키를 클릭하면 대기열에 있는 사용자 목록을 확인할 수 있습니다.
+
+<!-- TODO: lobby:queue ZSET 상세 화면 캡쳐 (멤버와 score가 보이는 상태) -->
+![Redis ZSET 상세 화면](./images/redis-commander-zset.png)
+
+### queue:config 설정 확인
+
+`queue:config` 키를 클릭하면 현재 대기열 설정(mode, capacity 등)을 확인할 수 있습니다.
+
+<!-- TODO: queue:config Hash 상세 화면 캡쳐 -->
+![Redis Hash 설정 화면](./images/redis-commander-config.png)
+
 ---
 
 ## 2. 테스트 데이터 생성
@@ -170,6 +189,29 @@ docker exec -it ticketing-redis redis-cli zrem lobby:queue "test-user-1" "test-u
 ## 7. 대기열 모드 변경하기
 
 > ⚠️ **중요**: 대기열 설정은 Redis에 저장됩니다. `.env` 파일의 `QUEUE_MODE`를 변경해도 이미 Redis에 저장된 설정이 우선 적용됩니다.
+
+### Simple vs Advanced 모드
+
+| 모드 | 구조 | 설명 |
+|------|------|------|
+| **Simple** | 1단 큐 | 로비 대기열만 사용. 대기 후 바로 티켓 발급 |
+| **Advanced** | 2단 큐 | 로비 대기열 → 이벤트 선택 → 이벤트별 대기열 → 티켓 발급 |
+
+```mermaid
+graph LR
+    subgraph Simple["Simple 모드 (1단 큐)"]
+        S1[사용자] --> S2[로비 대기열] --> S3[티켓 발급]
+    end
+```
+
+```mermaid
+graph LR
+    subgraph Advanced["Advanced 모드 (2단 큐)"]
+        A1[사용자] --> A2[로비 대기열] --> A3[이벤트 선택]
+        A3 --> A4[이벤트 A 대기열] --> A5[티켓 발급]
+        A3 --> A6[이벤트 B 대기열] --> A7[티켓 발급]
+    end
+```
 
 ### 현재 설정 확인
 
