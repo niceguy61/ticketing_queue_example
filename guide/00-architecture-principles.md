@@ -191,7 +191,8 @@ flowchart TD
 | [01. Redis ZSET](./01-redis-zset.md) | Redis만으로 대기열 구현 | 소규모, 단순 요구사항 |
 | [02. Redis + RabbitMQ](./02-redis-rabbitmq.md) | 하이브리드 아키텍처 | 온프레미스, Amazon MQ |
 | [03. Redis + SQS](./03-redis-sqs.md) | AWS 네이티브 구성 | AWS 프로덕션 |
-| [04. 비교](./04-comparison.md) | 아키텍처별 장단점 비교 | 의사결정 참고 |
+| [04. Redis + Kafka](./04-redis-kafka.md) | 대용량 스트리밍 아키텍처 | AWS MSK, 대규모 이벤트 |
+| [05. 비교](./05-comparison.md) | 아키텍처별 장단점 비교 | 의사결정 참고 |
 
 ---
 
