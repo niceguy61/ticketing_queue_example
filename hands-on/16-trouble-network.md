@@ -1,6 +1,6 @@
-# 15. 문제 해결: 네트워크/포트 관련
+# 16. 문제 해결: 네트워크/포트 관련
 
-[← 14. Docker 문제](./14-trouble-docker.md) | [목차](./README.md) | [16. 서비스 문제 →](./16-trouble-service.md)
+[← 15. Docker 문제](./15-trouble-docker.md) | [목차](./README.md) | [17. 서비스 문제 →](./17-trouble-service.md)
 
 ---
 
@@ -218,4 +218,4 @@ lsof -i -P -n | grep LISTEN
 
 ---
 
-[← 14. Docker 문제](./14-trouble-docker.md) | [목차](./README.md) | [16. 서비스 문제 →](./16-trouble-service.md)
+[← 15. Docker 문제](./15-trouble-docker.md) | [목차](./README.md) | [17. 서비스 문제 →](./17-trouble-service.md)

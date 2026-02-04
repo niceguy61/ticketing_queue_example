@@ -2,6 +2,7 @@ import { QueueAdapter, QueueAdapterConfig } from './types';
 import { SQSAdapter } from './sqsAdapter';
 import { RedisAdapter } from './redisAdapter';
 import { RabbitMQAdapter } from './rabbitmqAdapter';
+import { KafkaAdapter } from './kafkaAdapter';
 import logger from '../utils/logger';
 
 /**
@@ -28,8 +29,7 @@ export class QueueAdapterFactory {
         return new RabbitMQAdapter(config);
 
       case 'kafka':
-        // TODO: Kafka Adapter 구현
-        throw new Error('Kafka adapter not implemented yet');
+        return new KafkaAdapter(config);
 
       case 'redis':
         return new RedisAdapter(config);

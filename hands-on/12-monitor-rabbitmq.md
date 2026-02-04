@@ -1,6 +1,6 @@
 # 12. RabbitMQ 모니터링
 
-[← 11. Redis 모니터링](./11-monitor-redis.md) | [목차](./README.md) | [13. 로그 확인 →](./13-monitor-logs.md)
+[← 11. Redis 모니터링](./11-monitor-redis.md) | [목차](./README.md) | [13. 로그 확인 →](./13-monitor-kafka.md)
 
 ---
 
@@ -195,4 +195,4 @@ Admin 탭 → Policies에서 큐 정책 설정 가능:
 
 ---
 
-[← 11. Redis 모니터링](./11-monitor-redis.md) | [목차](./README.md) | [13. 로그 확인 →](./13-monitor-logs.md)
+[← 11. Redis 모니터링](./11-monitor-redis.md) | [목차](./README.md) | [13. Kafka 모니터링 →](./13-monitor-kafka.md)

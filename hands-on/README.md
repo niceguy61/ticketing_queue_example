@@ -80,19 +80,20 @@ graph TB
 |------|------|----------|
 | [11](./11-monitor-redis.md) | Redis 모니터링 | 3분 |
 | [12](./12-monitor-rabbitmq.md) | RabbitMQ 모니터링 | 3분 |
-| [13](./13-monitor-logs.md) | 로그 확인 | 3분 |
+| [13](./13-monitor-kafka.md) | Kafka 모니터링 | 3분 |
+| [14](./14-monitor-logs.md) | 로그 확인 | 3분 |
 
 ### 문제 해결
 | 스텝 | 제목 |
 |------|------|
-| [14](./14-trouble-docker.md) | Docker 관련 문제 |
-| [15](./15-trouble-network.md) | 네트워크/포트 문제 |
-| [16](./16-trouble-service.md) | 서비스 기동 문제 |
+| [15](./15-trouble-docker.md) | Docker 관련 문제 |
+| [16](./16-trouble-network.md) | 네트워크/포트 문제 |
+| [17](./17-trouble-service.md) | 서비스 기동 문제 |
 
 ### 정리
 | 스텝 | 제목 | 예상 시간 |
 |------|------|----------|
-| [17](./17-cleanup.md) | 리소스 정리 | 2분 |
+| [18](./18-cleanup.md) | 리소스 정리 | 2분 |
 
 ---
 

@@ -1,6 +1,6 @@
-# 13. 로그 확인
+# 14. 로그 확인
 
-[← 12. RabbitMQ 모니터링](./12-monitor-rabbitmq.md) | [목차](./README.md) | [14. Docker 문제 해결 →](./14-trouble-docker.md)
+[← 13. Kafka 모니터링](./13-monitor-kafka.md) | [목차](./README.md) | [15. Docker 문제 해결 →](./15-trouble-docker.md)
 
 ---
 
@@ -210,4 +210,4 @@ docker compose logs queue-service | grep -c "ERROR"
 
 ---
 
-[← 12. RabbitMQ 모니터링](./12-monitor-rabbitmq.md) | [목차](./README.md) | [14. Docker 문제 해결 →](./14-trouble-docker.md)
+[← 13. Kafka 모니터링](./13-monitor-kafka.md) | [목차](./README.md) | [15. Docker 문제 해결 →](./15-trouble-docker.md)

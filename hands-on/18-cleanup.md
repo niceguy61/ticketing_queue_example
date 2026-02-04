@@ -1,6 +1,6 @@
-# 17. 리소스 정리
+# 18. 리소스 정리
 
-[← 16. 서비스 문제](./16-trouble-service.md) | [목차](./README.md)
+[← 17. 서비스 문제](./17-trouble-service.md) | [목차](./README.md)
 
 ---
 
@@ -125,9 +125,9 @@ docker compose up -d postgres redis rabbitmq redis-commander
 
 - Docker Desktop 설치 및 기본 사용법
 - docker-compose를 이용한 멀티 컨테이너 환경 구성
-- PostgreSQL, Redis, RabbitMQ 인프라 구성
+- PostgreSQL, Redis, RabbitMQ, Kafka 인프라 구성
 - 마이크로서비스 아키텍처 이해
-- Redis Commander, RabbitMQ Management UI 모니터링
+- Redis Commander, RabbitMQ Management UI, Kafka UI 모니터링
 - Docker 로그 확인 및 문제 해결
 
 ### 다음 단계
@@ -138,4 +138,4 @@ docker compose up -d postgres redis rabbitmq redis-commander
 
 ---
 
-[← 16. 서비스 문제](./16-trouble-service.md) | [목차](./README.md)
+[← 17. 서비스 문제](./17-trouble-service.md) | [목차](./README.md)
