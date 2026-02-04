@@ -5,10 +5,10 @@
 ## 📚 목차
 
 ### 큐 아키텍처 가이드
-1. [Redis ZSET 기반 대기열](01-redis-zset.md) - 가장 기본적인 실시간 대기열
-2. [Redis + RabbitMQ 하이브리드](02-redis-rabbitmq.md) - 신뢰성 있는 메시지 처리
-3. [Redis + AWS SQS 클라우드 네이티브](03-redis-sqs.md) - 완전 관리형 서비스
-4. [아키텍처 비교 가이드](04-comparison.md) - 상황별 선택 가이드
+1. [Redis ZSET 기반 대기열](guide/01-redis-zset.md) - 가장 기본적인 실시간 대기열
+2. [Redis + RabbitMQ 하이브리드](guide/02-redis-rabbitmq.md) - 신뢰성 있는 메시지 처리
+3. [Redis + AWS SQS 클라우드 네이티브](guide/03-redis-sqs.md) - 완전 관리형 서비스
+4. [아키텍처 비교 가이드](guide/04-comparison.md) - 상황별 선택 가이드
 
 ## 🎯 학습 목표
 
@@ -20,6 +20,5 @@
 
 ## 🔗 관련 문서
 
-- [메인 README](../README.md) - 아키텍처 개요
-- [API 문서](../docs/api/) - 서비스별 API 명세
-- [Docker 가이드](../DOCKER_QUICK_START.md) - 로컬 환경 설정
+- [API 문서](docs/api/) - 서비스별 API 명세
+- [Docker 가이드](DOCKER_QUICK_START.md) - 로컬 환경 설정
