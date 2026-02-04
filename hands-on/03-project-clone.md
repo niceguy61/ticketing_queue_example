@@ -21,7 +21,7 @@ GitHub에서 프로젝트를 클론하고 디렉토리 구조를 확인합니다
 cd ~/projects
 
 # 프로젝트 클론
-git clone <repository-url> ticketing-queue-system
+git clone https://github.com/niceguy61/ticketing_queue_example.git ticketing-queue-system
 
 # 프로젝트 디렉토리로 이동
 cd ticketing-queue-system
