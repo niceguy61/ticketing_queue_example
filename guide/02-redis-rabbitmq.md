@@ -5,19 +5,58 @@ Redis ZSET의 실시간 위치 추적과 RabbitMQ의 신뢰성 있는 메시지 
 ## 개요
 
 ```mermaid
-flowchart LR
-    Client([Client]) --> QS[Queue Service]
-    
-    subgraph "상태 관리"
-        QS --> Redis[(Redis ZSET)]
+flowchart TB
+    subgraph Clients
+        C1([Web Client])
+        C2([Mobile Client])
     end
     
-    subgraph "이벤트 처리"
-        QS --> RMQ[(RabbitMQ)]
-        RMQ --> Worker[Worker]
-        Worker --> TS[Ticket Service]
+    subgraph Services
+        QS[Queue Service<br/>대기열 관리]
+        TS[Ticket Service<br/>티켓 발급]
+        US[User Service<br/>사용자 관리]
+        NS[Notification Service<br/>알림 발송]
     end
+    
+    subgraph "Redis (상태 관리)"
+        Redis[(Redis)]
+        Q1[queue:lobby ZSET]
+        Q2[queue:event:* ZSET]
+        Cache[cache:* String]
+    end
+    
+    subgraph "RabbitMQ (이벤트 처리)"
+        RMQ[(RabbitMQ)]
+        EX[ticket-exchange]
+        TQ[ticket-issue-queue]
+        NQ[notification-queue]
+        DLQ[dead-letter-queue]
+    end
+    
+    subgraph Workers
+        W1[Ticket Worker]
+        W2[Notification Worker]
+    end
+    
+    C1 & C2 --> QS & TS & US
+    
+    QS --> Q1 & Q2
+    TS --> Redis
+    US --> Cache
+    
+    QS -->|발행| EX
+    TS -->|발행| EX
+    EX --> TQ & NQ
+    TQ --> W1 --> TS
+    NQ --> W2 --> NS
+    TQ & NQ -.->|실패| DLQ
 ```
+
+### 다중 서비스 구조
+- **Queue Service**: Redis ZSET 관리 + RabbitMQ 이벤트 발행
+- **Ticket Service**: 티켓 발급 + 발급 완료 이벤트 발행
+- **Notification Service**: 알림 큐 구독하여 푸시/이메일 발송
+- **Workers**: 각 큐별 전용 워커가 메시지 처리
 
 ## 역할 분담
 

@@ -5,13 +5,41 @@ Redis의 Sorted Set(ZSET)을 활용한 가장 기본적인 대기열 구현 방�
 ## 개요
 
 ```mermaid
-flowchart LR
-    Client([Client]) --> QS[Queue Service]
-    QS --> Redis[(Redis ZSET)]
-    Redis --> |ZRANK| Position[위치 조회]
-    Redis --> |ZADD| Add[대기열 추가]
-    Redis --> |ZPOPMIN| Pop[다음 사용자]
+flowchart TB
+    subgraph Clients
+        C1([Web Client])
+        C2([Mobile Client])
+    end
+    
+    subgraph Services
+        QS[Queue Service<br/>대기열 관리]
+        TS[Ticket Service<br/>티켓 발급]
+        US[User Service<br/>사용자 관리]
+    end
+    
+    subgraph "Redis (단일 인스턴스)"
+        Redis[(Redis)]
+        Q1[queue:lobby<br/>ZSET]
+        Q2[queue:event:*<br/>ZSET]
+        Cache[cache:*<br/>String/Hash]
+    end
+    
+    C1 & C2 --> QS
+    C1 & C2 --> TS
+    C1 & C2 --> US
+    
+    QS --> Q1 & Q2
+    TS --> Redis
+    US --> Cache
+    
+    QS -.->|티켓 발급 요청| TS
 ```
+
+### 다중 서비스 구조
+- **Queue Service**: 대기열 ZSET 관리 (queue:lobby, queue:event:*)
+- **Ticket Service**: 티켓 정보 저장/조회
+- **User Service**: 사용자 세션, 캐시 관리
+- 모든 서비스가 **동일한 Redis 인스턴스**에 연결
 
 ## 핵심 개념
 

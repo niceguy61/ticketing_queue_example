@@ -5,19 +5,63 @@ Redis ZSET과 AWS SQS를 결합한 완전 관리형 클라우드 네이티브 �
 ## 개요
 
 ```mermaid
-flowchart LR
-    Client([Client]) --> QS[Queue Service]
-    
-    subgraph "상태 관리"
-        QS --> Redis[(Redis/ElastiCache)]
+flowchart TB
+    subgraph Clients
+        C1([Web Client])
+        C2([Mobile Client])
     end
     
-    subgraph "AWS"
-        QS --> SQS[(SQS)]
-        SQS --> Lambda[Lambda/Worker]
-        Lambda --> TS[Ticket Service]
+    subgraph "ECS/EKS Services"
+        QS[Queue Service<br/>대기열 관리]
+        TS[Ticket Service<br/>티켓 발급]
+        US[User Service<br/>사용자 관리]
     end
+    
+    subgraph "ElastiCache (상태 관리)"
+        Redis[(ElastiCache Redis)]
+        Q1[queue:lobby ZSET]
+        Q2[queue:event:* ZSET]
+        Session[session:* Hash]
+    end
+    
+    subgraph "SQS (이벤트 처리)"
+        TQ[ticket-issue-queue]
+        NQ[notification-queue]
+        TQ_DLQ[ticket-dlq]
+        NQ_DLQ[notification-dlq]
+    end
+    
+    subgraph "Lambda Workers"
+        L1[TicketProcessor<br/>Lambda]
+        L2[NotificationSender<br/>Lambda]
+    end
+    
+    subgraph "Other AWS"
+        SNS[SNS<br/>푸시 알림]
+        SES[SES<br/>이메일]
+    end
+    
+    C1 & C2 --> QS & TS & US
+    
+    QS --> Q1 & Q2
+    TS --> Redis
+    US --> Session
+    
+    QS -->|발행| TQ
+    TS -->|발행| NQ
+    
+    TQ --> L1 --> TS
+    NQ --> L2 --> SNS & SES
+    
+    TQ -.->|3회 실패| TQ_DLQ
+    NQ -.->|3회 실패| NQ_DLQ
 ```
+
+### 다중 서비스 구조
+- **Queue Service**: ElastiCache ZSET 관리 + SQS 이벤트 발행
+- **Ticket Service**: RDS에 티켓 저장 + 알림 이벤트 발행
+- **Lambda Workers**: SQS 트리거로 자동 스케일링
+- **SNS/SES**: 푸시 알림, 이메일 발송 통합
 
 ## AWS SQS란?
 
