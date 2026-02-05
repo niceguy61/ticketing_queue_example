@@ -193,6 +193,24 @@ export class QueueProcessor {
       try {
         logger.info('Processing ticket issue request', { userId, eventId, retryCount: _retryCount });
 
+        // 이벤트 존재 여부 확인 (eventId가 있는 경우)
+        if (eventId) {
+          const ticketEvents = await this.configManager.getAllTicketEvents();
+          if (!ticketEvents[eventId]) {
+            logger.warn('Event not found, discarding message', { userId, eventId });
+            
+            // 사용자에게 이벤트 없음 알림
+            this.io.to(userId).emit('queue:error', {
+              message: `선택하신 이벤트를 찾을 수 없습니다. (${eventId})`,
+              code: 'EVENT_NOT_FOUND'
+            });
+            
+            // 메시지 처리 완료로 처리 (재시도하지 않음)
+            await ack();
+            return;
+          }
+        }
+
         // 티켓 발급
         const ticket = await this.ticketClient.issueTicket(userId, eventId);
 
