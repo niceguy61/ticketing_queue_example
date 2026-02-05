@@ -264,8 +264,6 @@ services:
         condition: service_healthy
       ticket-service:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - ticketing-network
     restart: unless-stopped
