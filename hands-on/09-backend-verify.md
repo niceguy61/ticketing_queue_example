@@ -82,13 +82,8 @@ curl -s -X POST http://localhost:3003/api/users/register \
 **예상 출력:**
 ```json
 {
-  "success": true,
-  "data": {
-    "user_id": "...",
-    "username": "testuser",
-    "email": "test@example.com",
-    "created_at": "..."
-  }
+  "userId": "bf000...",
+  "sessionToken": "..."
 }
 ```
 
@@ -133,10 +128,12 @@ curl -s http://localhost:3001/api/queue/mode | jq
 {
   "success": true,
   "data": {
-    "mode": "advanced"
+    "mode": "simple"
   }
 }
 ```
+
+> 💡 기본값은 `simple` 모드입니다. `advanced` 모드를 사용하려면 `.env`에서 `QUEUE_MODE=advanced`로 설정하세요.
 
 ### 로비 대기열 상태 조회
 
@@ -179,10 +176,13 @@ USER_RESPONSE=$(curl -s -X POST http://localhost:3003/api/users/register \
   -H "Content-Type: application/json" \
   -d '{"username": "queuetest", "email": "queue@test.com"}')
 
-USER_ID=$(echo $USER_RESPONSE | jq -r '.data.user_id')
+echo "Response: $USER_RESPONSE"
+
+# 2. user_id 추출
+USER_ID=$(echo $USER_RESPONSE | jq -r '.userId')
 echo "Created User ID: $USER_ID"
 
-# 2. 대기열 진입
+# 3. 대기열 진입
 curl -s -X POST http://localhost:3001/api/queue/lobby/join \
   -H "Content-Type: application/json" \
   -d "{\"userId\": \"$USER_ID\"}" | jq

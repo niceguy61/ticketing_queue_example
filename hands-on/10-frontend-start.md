@@ -93,7 +93,7 @@ Advanced 모드에서는 로비 대기열 통과 후 이벤트를 선택할 수 
 <!-- TODO: Advanced 모드 프론트엔드 화면 캡쳐 (이벤트 선택 화면 또는 "고급 모드" 배너가 보이는 상태) -->
 ![프론트엔드 Advanced 모드](images/frontend-advanced-mode.png)
 
-> 💡 모드 변경 방법은 [11. Redis 모니터링](./11-monitor-redis.md#7-대기열-모드-변경하기)을 참고하세요.
+> 💡 모드 변경 방법은 [04. 환경변수 설정](./04-env-setup.md)에서 `QUEUE_MODE=advanced`로 설정 후 서비스를 재시작하세요.
 
 ---
 
