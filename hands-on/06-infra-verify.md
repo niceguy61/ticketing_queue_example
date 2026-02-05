@@ -107,7 +107,38 @@ Listing queues for vhost / ...
 
 ---
 
-## 4. 웹 UI 접속 확인
+## 4. Kafka 연결 확인 (선택적)
+
+Kafka를 `--profile kafka`로 시작한 경우에만 확인합니다.
+
+```bash
+# Kafka 브로커 상태 확인
+docker exec -it ticketing-kafka kafka-broker-api-versions --bootstrap-server localhost:9092 | head -5
+```
+
+**예상 출력:**
+```
+ApiVersion(apiKey=0, minVersion=0, maxVersion=...)
+ApiVersion(apiKey=1, minVersion=0, maxVersion=...)
+...
+```
+
+### Kafka 토픽 목록 확인
+
+```bash
+docker exec -it ticketing-kafka kafka-topics --bootstrap-server localhost:9092 --list
+```
+
+**예상 출력 (초기 상태):**
+```
+(빈 출력 - 아직 토픽이 없음)
+```
+
+> 💡 아직 토픽이 없는 것이 정상입니다. 서비스 기동 후 생성됩니다.
+
+---
+
+## 5. 웹 UI 접속 확인
 
 ### Redis Commander
 
@@ -131,9 +162,20 @@ http://localhost:15672
 
 대시보드가 표시되면 정상입니다.
 
+### Kafka UI (선택적)
+
+Kafka를 시작한 경우, 브라우저에서 접속:
+```
+http://localhost:8082
+```
+
+Kafka 클러스터, 토픽, 컨슈머 그룹 등을 시각적으로 확인할 수 있습니다.
+
+> 💡 상세한 Kafka UI 사용법은 [13. Kafka 모니터링](./13-monitor-kafka.md)을 참조하세요.
+
 ---
 
-## 5. 네트워크 확인
+## 6. 네트워크 확인
 
 컨테이너들이 같은 네트워크에 있는지 확인합니다:
 
@@ -141,9 +183,14 @@ http://localhost:15672
 docker network inspect ticketing-network --format '{{range .Containers}}{{.Name}} {{end}}'
 ```
 
-**예상 출력:**
+**예상 출력 (기본):**
 ```
 ticketing-postgres ticketing-redis ticketing-rabbitmq ticketing-redis-commander
+```
+
+**예상 출력 (Kafka 포함 시):**
+```
+ticketing-postgres ticketing-redis ticketing-rabbitmq ticketing-redis-commander ticketing-zookeeper ticketing-kafka ticketing-kafka-ui
 ```
 
 ---
@@ -158,6 +205,7 @@ ticketing-postgres ticketing-redis ticketing-rabbitmq ticketing-redis-commander
 - [ ] RabbitMQ: `rabbitmqctl status`가 정상 출력된다
 - [ ] Redis Commander UI (http://localhost:8081) 접속 가능
 - [ ] RabbitMQ Management UI (http://localhost:15672) 접속 가능
+- [ ] (Kafka 사용 시) Kafka UI (http://localhost:8082) 접속 가능
 
 ---
 
