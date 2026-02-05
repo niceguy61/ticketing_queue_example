@@ -1,6 +1,6 @@
 # 10. 프론트엔드 기동
 
-[← 09. 백엔드 확인](./09-backend-verify.md) | [목차](./README.md) | [11. Redis 모니터링 →](./11-monitor-redis.md)
+[← 09. 백엔드 확인](./09-backend-verify.md) | [목차](./README.md) | [11. 환경변수 변경 →](./11-env-change.md)
 
 ---
 
@@ -151,4 +151,4 @@ ticketing-user-service        Up (healthy)             0.0.0.0:3003->3003/tcp
 
 ---
 
-[← 09. 백엔드 확인](./09-backend-verify.md) | [목차](./README.md) | [11. Redis 모니터링 →](./11-monitor-redis.md)
+[← 09. 백엔드 확인](./09-backend-verify.md) | [목차](./README.md) | [11. 환경변수 변경 →](./11-env-change.md)

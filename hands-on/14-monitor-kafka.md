@@ -1,6 +1,6 @@
-# 13. Kafka 모니터링
+# 14. Kafka 모니터링
 
-[← 12. RabbitMQ 모니터링](./12-monitor-rabbitmq.md) | [목차](./README.md) | [14. 로그 확인 →](./14-monitor-logs.md)
+[← 13. RabbitMQ 모니터링](./13-monitor-rabbitmq.md) | [목차](./README.md) | [15. SQS 모니터링 →](./15-monitor-sqs.md)
 
 ---
 
@@ -209,4 +209,4 @@ docker exec -it ticketing-kafka kafka-console-consumer --bootstrap-server localh
 
 ---
 
-[← 12. RabbitMQ 모니터링](./12-monitor-rabbitmq.md) | [목차](./README.md) | [14. 로그 확인 →](./14-monitor-logs.md)
+[← 13. RabbitMQ 모니터링](./13-monitor-rabbitmq.md) | [목차](./README.md) | [15. SQS 모니터링 →](./15-monitor-sqs.md)

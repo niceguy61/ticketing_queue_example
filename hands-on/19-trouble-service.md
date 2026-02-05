@@ -1,6 +1,6 @@
-# 17. 문제 해결: 서비스 기동 문제
+# 19. 문제 해결: 서비스 기동 문제
 
-[← 16. 네트워크 문제](./16-trouble-network.md) | [목차](./README.md) | [18. 정리 →](./18-cleanup.md)
+[← 18. 네트워크 문제](./18-trouble-network.md) | [목차](./README.md) | [20. 정리 →](./20-cleanup.md)
 
 ---
 
@@ -273,4 +273,4 @@ docker top ticketing-queue-service
 
 ---
 
-[← 16. 네트워크 문제](./16-trouble-network.md) | [목차](./README.md) | [18. 정리 →](./18-cleanup.md)
+[← 17. 네트워크 문제](./17-trouble-network.md) | [목차](./README.md) | [19. 정리 →](./19-cleanup.md)

@@ -1,6 +1,6 @@
-# 15. 문제 해결: Docker 관련
+# 17. 문제 해결: Docker 관련
 
-[← 14. 로그 확인](./14-monitor-logs.md) | [목차](./README.md) | [16. 네트워크 문제 →](./16-trouble-network.md)
+[← 16. 로그 확인](./16-monitor-logs.md) | [목차](./README.md) | [18. 네트워크 문제 →](./18-trouble-network.md)
 
 ---
 
@@ -255,4 +255,4 @@ docker stats
 
 ---
 
-[← 14. 로그 확인](./14-monitor-logs.md) | [목차](./README.md) | [16. 네트워크 문제 →](./16-trouble-network.md)
+[← 15. 로그 확인](./15-monitor-logs.md) | [목차](./README.md) | [17. 네트워크 문제 →](./17-trouble-network.md)

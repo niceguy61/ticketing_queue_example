@@ -74,32 +74,34 @@ graph TB
 | [08](./08-backend-start.md) | 백엔드 서비스 기동 | 2분 |
 | [09](./09-backend-verify.md) | 백엔드 동작 확인 | 3분 |
 | [10](./10-frontend-start.md) | 프론트엔드 기동 | 3분 |
+| [11](./11-env-change.md) | 환경변수 변경 및 재배포 | 5분 |
 
 ### 모니터링
 | 스텝 | 제목 | 예상 시간 |
 |------|------|----------|
-| [11](./11-monitor-redis.md) | Redis 모니터링 | 3분 |
-| [12](./12-monitor-rabbitmq.md) | RabbitMQ 모니터링 | 3분 |
-| [13](./13-monitor-kafka.md) | Kafka 모니터링 | 3분 |
-| [14](./14-monitor-logs.md) | 로그 확인 | 3분 |
+| [12](./12-monitor-redis.md) | Redis 모니터링 | 3분 |
+| [13](./13-monitor-rabbitmq.md) | RabbitMQ 모니터링 | 3분 |
+| [14](./14-monitor-kafka.md) | Kafka 모니터링 | 3분 |
+| [15](./15-monitor-sqs.md) | SQS 모니터링 (LocalStack) | 3분 |
+| [16](./16-monitor-logs.md) | 로그 확인 | 3분 |
 
 ### 문제 해결
 | 스텝 | 제목 |
 |------|------|
-| [15](./15-trouble-docker.md) | Docker 관련 문제 |
-| [16](./16-trouble-network.md) | 네트워크/포트 문제 |
-| [17](./17-trouble-service.md) | 서비스 기동 문제 |
+| [17](./17-trouble-docker.md) | Docker 관련 문제 |
+| [18](./18-trouble-network.md) | 네트워크/포트 문제 |
+| [19](./19-trouble-service.md) | 서비스 기동 문제 |
 
 ### 정리
 | 스텝 | 제목 | 예상 시간 |
 |------|------|----------|
-| [18](./18-cleanup.md) | 리소스 정리 | 2분 |
+| [20](./20-cleanup.md) | 리소스 정리 | 2분 |
 
 ---
 
 ## 총 예상 소요 시간
 
-약 **40분** (문제 해결 제외)
+약 **48분** (문제 해결 제외)
 
 ---
 

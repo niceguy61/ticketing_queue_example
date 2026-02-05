@@ -1,6 +1,6 @@
-# 11. Redis 모니터링
+# 12. Redis 모니터링
 
-[← 10. 프론트엔드 기동](./10-frontend-start.md) | [목차](./README.md) | [12. RabbitMQ 모니터링 →](./12-monitor-rabbitmq.md)
+[← 11. 환경변수 변경](./11-env-change.md) | [목차](./README.md) | [13. RabbitMQ 모니터링 →](./13-monitor-rabbitmq.md)
 
 ---
 
@@ -399,4 +399,4 @@ docker exec -it ticketing-redis redis-cli hget queue:config ticketEvents
 
 ---
 
-[← 10. 프론트엔드 기동](./10-frontend-start.md) | [목차](./README.md) | [12. RabbitMQ 모니터링 →](./12-monitor-rabbitmq.md)
+[← 11. 환경변수 변경](./11-env-change.md) | [목차](./README.md) | [13. RabbitMQ 모니터링 →](./13-monitor-rabbitmq.md)

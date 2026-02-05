@@ -1,6 +1,6 @@
-# 18. 리소스 정리
+# 20. 리소스 정리
 
-[← 17. 서비스 문제](./17-trouble-service.md) | [목차](./README.md)
+[← 19. 서비스 문제](./19-trouble-service.md) | [목차](./README.md)
 
 ---
 

@@ -1,6 +1,6 @@
-# 14. 로그 확인
+# 16. 로그 확인
 
-[← 13. Kafka 모니터링](./13-monitor-kafka.md) | [목차](./README.md) | [15. Docker 문제 해결 →](./15-trouble-docker.md)
+[← 15. SQS 모니터링](./15-monitor-sqs.md) | [목차](./README.md) | [17. Docker 문제 해결 →](./17-trouble-docker.md)
 
 ---
 
@@ -210,4 +210,4 @@ docker compose logs queue-service | grep -c "ERROR"
 
 ---
 
-[← 13. Kafka 모니터링](./13-monitor-kafka.md) | [목차](./README.md) | [15. Docker 문제 해결 →](./15-trouble-docker.md)
+[← 15. SQS 모니터링](./15-monitor-sqs.md) | [목차](./README.md) | [17. Docker 문제 해결 →](./17-trouble-docker.md)
