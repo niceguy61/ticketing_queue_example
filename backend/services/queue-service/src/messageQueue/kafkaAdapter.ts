@@ -19,7 +19,7 @@ export class KafkaAdapter implements QueueAdapter {
 
   constructor(config?: QueueAdapterConfig) {
     this.brokers = config?.brokers || 
-      (process.env.KAFKA_BROKERS?.split(',') || ['localhost:9092']);
+      (process.env.KAFKA_BROKERS?.split(',') || ['kafka:29092']);
     this.clientId = config?.clientId || process.env.KAFKA_CLIENT_ID || 'queue-service';
     this.groupId = process.env.KAFKA_GROUP_ID || 'queue-service-group';
 
