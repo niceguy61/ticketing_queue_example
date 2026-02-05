@@ -57,6 +57,15 @@ cat .env | head -50
 | `RABBITMQ_PORT` | 15673 | AMQP 포트 (외부) |
 | `RABBITMQ_MGMT_PORT` | 15672 | 관리 UI 포트 |
 
+### Kafka (선택적)
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `KAFKA_BROKER_EXTERNAL` | localhost:9092 | 외부 접속용 브로커 주소 |
+| `KAFKA_BROKER_INTERNAL` | kafka:29092 | Docker 내부 브로커 주소 |
+| `KAFKA_UI_PORT` | 8082 | Kafka UI 포트 |
+
+> 💡 Kafka는 `--profile kafka` 옵션으로 별도 실행합니다.
+
 ### 서비스 포트
 | 변수 | 기본값 | 설명 |
 |------|--------|------|
@@ -76,6 +85,8 @@ cat .env | head -50
 lsof -i :5432  # PostgreSQL
 lsof -i :6379  # Redis
 lsof -i :15672 # RabbitMQ Management
+lsof -i :9092  # Kafka (선택적)
+lsof -i :8082  # Kafka UI (선택적)
 lsof -i :3001  # Queue Service
 lsof -i :3002  # Ticket Service
 lsof -i :3003  # User Service
@@ -152,7 +163,7 @@ POSTGRES_DB=ticketing
 다음을 확인하세요:
 
 - [ ] `.env` 파일이 생성되었다
-- [ ] 주요 포트(5432, 6379, 15672, 3001-3003, 80)가 사용 가능하다
+- [ ] 주요 포트(5432, 6379, 15672, 9092, 8082, 3001-3003, 80)가 사용 가능하다
 - [ ] 포트 충돌이 있다면 `.env`에서 변경했다
 - [ ] 환경변수 변경 시 `--force-recreate` 또는 `--build` 옵션이 필요함을 이해했다
 
