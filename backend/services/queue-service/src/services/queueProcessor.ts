@@ -131,6 +131,18 @@ export class QueueProcessor {
    */
   private async processNextUser(queueName: string, eventId?: string): Promise<void> {
     try {
+      // 티켓 대기열인 경우 모니터링을 위한 딜레이 추가 (큐에서 꺼내기 전)
+      const isTicketQueue = queueName.startsWith('ticket:queue:');
+      const ticketQueueDelay = parseInt(process.env.TICKET_QUEUE_DELAY_MS || '0', 10);
+      
+      if (isTicketQueue && ticketQueueDelay > 0) {
+        logger.info('Applying ticket queue delay for monitoring (before pop)', { 
+          queueName,
+          delayMs: ticketQueueDelay
+        });
+        await new Promise(resolve => setTimeout(resolve, ticketQueueDelay));
+      }
+
       // 대기열에서 다음 사용자 원자적으로 가져오기 및 제거
       const nextUser = await this.queueDS.popNextUser(queueName);
 
@@ -192,6 +204,17 @@ export class QueueProcessor {
 
       try {
         logger.info('Processing ticket issue request', { userId, eventId, retryCount: _retryCount });
+
+        // 모니터링을 위한 티켓 발급 딜레이 (메시지가 큐에 쌓이는 것을 관찰 가능)
+        const ticketIssueDelay = parseInt(process.env.TICKET_ISSUE_DELAY_MS || '0', 10);
+        if (ticketIssueDelay > 0) {
+          logger.info('Applying ticket issue delay for monitoring', { 
+            userId,
+            eventId,
+            delayMs: ticketIssueDelay
+          });
+          await new Promise(resolve => setTimeout(resolve, ticketIssueDelay));
+        }
 
         // 이벤트 존재 여부 확인 (eventId가 있는 경우)
         if (eventId) {

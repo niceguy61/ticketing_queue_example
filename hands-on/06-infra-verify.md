@@ -36,13 +36,15 @@ docker exec -it ticketing-postgres psql -U admin -d ticketing -c "\dt"
 **예상 출력:**
 ```
           List of relations
- Schema |   Name   | Type  | Owner
---------+----------+-------+-------
- public | events   | table | admin
- public | queues   | table | admin
- public | tickets  | table | admin
- public | users    | table | admin
-(4 rows)
+ Schema |     Name     | Type  | Owner 
+--------+--------------+-------+-------
+ public | events       | table | admin
+ public | reservations | table | admin
+ public | seats        | table | admin
+ public | sessions     | table | admin
+ public | tickets      | table | admin
+ public | users        | table | admin
+(6 rows)
 ```
 
 ---

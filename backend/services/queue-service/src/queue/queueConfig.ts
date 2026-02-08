@@ -204,6 +204,28 @@ export class QueueConfigManager {
   }
 
   /**
+   * 환경 변수 값을 기존 Redis 설정에 동기화
+   * 서비스 재기동 시 .env 변경 사항이 반영되도록 함
+   */
+  async syncFromEnv(): Promise<void> {
+    const mode = (process.env.QUEUE_MODE as QueueMode) || 'simple';
+    const lobbyCapacity = parseInt(process.env.LOBBY_CAPACITY || '1000', 10);
+    const processingRate = parseInt(process.env.PROCESSING_RATE || '10', 10);
+
+    const existing = await this.getConfig();
+
+    const updatedConfig: QueueConfig = {
+      mode,
+      lobbyCapacity,
+      processingRate,
+      // 기존 ticketEvents 데이터는 보존
+      ticketEvents: existing?.ticketEvents
+    };
+
+    await this.saveConfig(updatedConfig);
+  }
+
+  /**
    * 설정 삭제
    */
   async clearConfig(): Promise<void> {

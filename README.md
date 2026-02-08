@@ -26,3 +26,4 @@
 
 - [API 문서](docs/api/) - 서비스별 API 명세
 - [Docker 가이드](DOCKER_QUICK_START.md) - 로컬 환경 설정
+- [업데이트 로그](UPDATED.md) - 프로젝트 변경 사항 및 개선 내역
