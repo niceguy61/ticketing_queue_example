@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <!-- Background -->
+  <rect width="800" height="400" fill="#1e1e1e" />
+  
+  <!-- Kubernetes Cluster Box -->
+  <rect x="50" y="50" width="300" height="300" rx="10" fill="#2d2d2d" stroke="#326ce5" stroke-width="2" stroke-dasharray="5,5" />
+  <text x="70" y="80" fill="#326ce5" font-family="Arial, sans-serif" font-weight="bold" font-size="16">Kubernetes Cluster (k3d)</text>
+
+  <!-- Services -->
+  <g transform="translate(100, 120)">
+    <rect width="120" height="40" rx="5" fill="#4caf50" />
+    <text x="60" y="25" fill="white" text-anchor="middle" font-family="Arial" font-size="12">Queue Service</text>
+  </g>
+  <g transform="translate(100, 180)">
+    <rect width="120" height="40" rx="5" fill="#4caf50" />
+    <text x="60" y="25" fill="white" text-anchor="middle" font-family="Arial" font-size="12">Ticket Service</text>
+  </g>
+  <g transform="translate(100, 240)">
+    <rect width="120" height="40" rx="5" fill="#4caf50" />
+    <text x="60" y="25" fill="white" text-anchor="middle" font-family="Arial" font-size="12">User Service</text>
+  </g>
+
+  <!-- OTel Collector -->
+  <g transform="translate(380, 180)">
+    <polygon points="40,0 80,20 80,60 40,80 0,60 0,20" fill="#f57c00" />
+    <text x="40" y="45" fill="white" text-anchor="middle" font-family="Arial" font-size="10" font-weight="bold">OTel</text>
+    <text x="40" y="58" fill="white" text-anchor="middle" font-family="Arial" font-size="10">Collector</text>
+  </g>
+
+  <!-- Monitoring Stack Box -->
+  <rect x="550" y="50" width="200" height="300" rx="10" fill="#2d2d2d" stroke="#f57c00" stroke-width="2" />
+  <text x="570" y="80" fill="#f57c00" font-family="Arial, sans-serif" font-weight="bold" font-size="16">LGTM Stack</text>
+
+  <!-- LGTM Components -->
+  <g transform="translate(590, 110)">
+    <rect width="120" height="30" rx="5" fill="#e65100" />
+    <text x="60" y="20" fill="white" text-anchor="middle" font-family="Arial" font-size="12">Prometheus</text>
+  </g>
+  <g transform="translate(590, 160)">
+    <rect width="120" height="30" rx="5" fill="#fbc02d" />
+    <text x="60" y="20" fill="black" text-anchor="middle" font-family="Arial" font-size="12">Loki</text>
+  </g>
+  <g transform="translate(590, 210)">
+    <rect width="120" height="30" rx="5" fill="#0288d1" />
+    <text x="60" y="20" fill="white" text-anchor="middle" font-family="Arial" font-size="12">Tempo</text>
+  </g>
+
+  <!-- Grafana -->
+  <g transform="translate(590, 280)">
+    <rect width="120" height="40" rx="5" fill="#f06292" />
+    <text x="60" y="25" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14">Grafana</text>
+  </g>
+
+  <!-- Arrows -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#888" />
+    </marker>
+    <marker id="arrow-dash" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="#f57c00" />
+    </marker>
+  </defs>
+
+  <!-- App to Collector -->
+  <line x1="220" y1="140" x2="380" y2="210" stroke="#888" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="220" y1="200" x2="380" y2="220" stroke="#888" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="220" y1="260" x2="380" y2="230" stroke="#888" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Collector to LGTM -->
+  <line x1="460" y1="220" x2="590" y2="125" stroke="#f57c00" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-dash)" />
+  <line x1="460" y1="220" x2="590" y2="175" stroke="#f57c00" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-dash)" />
+  <line x1="460" y1="220" x2="590" y2="225" stroke="#f57c00" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-dash)" />
+
+  <!-- LGTM to Grafana -->
+  <line x1="650" y1="140" x2="650" y2="280" stroke="#f06292" stroke-width="2" />
+  <line x1="650" y1="190" x2="650" y2="280" stroke="#f06292" stroke-width="2" />
+  <line x1="650" y1="240" x2="650" y2="280" stroke="#f06292" stroke-width="2" />
+
+</svg>
