@@ -21,7 +21,7 @@ async function main() {
     await redisConnection.connect();
     logger.info('Redis connected successfully');
 
-    // 대기열 설정 초기화
+    // 대기열 설정 초기화 (환경 변수 → Redis 동기화)
     const configManager = new QueueConfigManager();
     const configExists = await configManager.configExists();
     
@@ -29,6 +29,10 @@ async function main() {
       logger.info('Initializing default queue configuration...');
       await configManager.initializeDefaultConfig();
       logger.info('Queue configuration initialized');
+    } else {
+      logger.info('Syncing environment variables to queue configuration...');
+      await configManager.syncFromEnv();
+      logger.info('Queue configuration synced from environment variables');
     }
 
     const config = await configManager.getConfig();

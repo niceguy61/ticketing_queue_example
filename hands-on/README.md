@@ -105,4 +105,10 @@ graph TB
 
 ---
 
+## 추가 문서
+
+- [업데이트 로그](../UPDATED.md) - 프로젝트 변경 사항 및 개선 내역
+
+---
+
 [01. Docker 설치 →](./01-docker-install.md)
