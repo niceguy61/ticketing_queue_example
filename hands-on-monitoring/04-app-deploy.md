@@ -28,9 +28,9 @@ data:
   # 서비스 포트 설정
   PORT: "3000"
   
-  # 인프라 연결 정보 (Service 이름으로 DNS 조회)
-  DB_HOST: "postgres"
-  REDIS_HOST: "redis"
+  # 인프라 연결 정보 (Helm 설치 시 생성되는 Service 이름 기준)
+  DB_HOST: "postgres-postgresql"
+  REDIS_HOST: "redis-master"
   RABBITMQ_HOST: "rabbitmq"
   
   # 서비스 URL (ClusterIP DNS)
@@ -82,27 +82,37 @@ spec:
     spec:
       containers:
       - name: queue-service
-        image: niceguy61/ticketing-queue-service:latest
-        imagePullPolicy: IfNotPresent  # 로컬 이미지를 우선 사용
+        image: queue-service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 3001
         env:
         - name: PORT
           value: "3001"
         - name: QUEUE_MODE
-          value: "advanced"  # 'simple' 또는 'advanced'
+          value: "advanced"
+        - name: QUEUE_PROVIDER
+          value: "rabbitmq"
         # DB 연결 정보 주입
-        - name: DB_Host
+        - name: DB_HOST
+          value: "postgres-postgresql"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "ticketing"
+        - name: DB_USER
           valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_HOST
+            secretKeyRef:
+              name: common-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: common-secret
+              key: DB_PASSWORD
         # Redis 연결 정보 주입
-        - name: REDIS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: REDIS_HOST
+        - name: REDIS_URL
+          value: "redis://redis-master:6379"
         # RabbitMQ 연결 정보 주입
         - name: RABBITMQ_URL
           value: "amqp://guest:guest@rabbitmq:5672"
@@ -150,18 +160,29 @@ spec:
     spec:
       containers:
       - name: ticket-service
-        image: niceguy61/ticketing-ticket-service:latest
-        imagePullPolicy: IfNotPresent
+        image: ticket-service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 3002
         env:
         - name: PORT
           value: "3002"
         - name: DB_HOST
+          value: "postgres-postgresql"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "ticketing"
+        - name: DB_USER
           valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_HOST
+            secretKeyRef:
+              name: common-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: common-secret
+              key: DB_PASSWORD
 
 ---
 apiVersion: v1
@@ -206,18 +227,29 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: niceguy61/ticketing-user-service:latest
-        imagePullPolicy: IfNotPresent
+        image: user-service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 3003
         env:
         - name: PORT
           value: "3003"
         - name: DB_HOST
+          value: "postgres-postgresql"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "ticketing"
+        - name: DB_USER
           valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: DB_HOST
+            secretKeyRef:
+              name: common-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: common-secret
+              key: DB_PASSWORD
 
 ---
 apiVersion: v1
@@ -270,8 +302,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: niceguy61/ticketing-frontend:latest
-        imagePullPolicy: IfNotPresent
+        image: frontend:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
 

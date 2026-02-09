@@ -21,16 +21,30 @@
 아래 명령어를 터미널에서 실행하여 여러 건의 요청을 발생시킵니다. (약 1분간 반복 실행 권장)
 
 ```bash
-# 1. 포트 포워딩 (Queue Service) - 터미널 1
+# 1. 포트 포워딩 (Queue Service, User Service) - 터미널 1
 kubectl port-forward svc/queue-service -n ticketing 3001:3001 &
+kubectl port-forward svc/user-service -n ticketing 3003:3003 &
 
 # 2. 트래픽 생성 (터미널 2)
-# 10명의 사용자가 1초 간격으로 대기열에 진입하는 시나리오
+# 10명의 사용자를 등록하고 1초 간격으로 대기열에 진입하는 시나리오
 for i in {1..10}; do
-  curl -X POST http://localhost:3001/api/queue/lobby/join \
+  # 사용자 등록 (UUID 발급)
+  RESPONSE=$(curl -s -X POST http://localhost:3003/api/users/register \
     -H "Content-Type: application/json" \
-    -d "{\"userId\": \"user-$(date +%s)-$i\"}"
-  echo " - Joined user $i"
+    -d "{\"username\": \"testuser-$i\", \"email\": \"testuser-$i@example.com\"}")
+  
+  USER_ID=$(echo $RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['userId'])" 2>/dev/null)
+  
+  if [ -z "$USER_ID" ]; then
+    echo "Failed to register user $i: $RESPONSE"
+    continue
+  fi
+  
+  # 대기열 진입
+  curl -s -X POST http://localhost:3001/api/queue/lobby/join \
+    -H "Content-Type: application/json" \
+    -d "{\"userId\": \"$USER_ID\"}"
+  echo " - User $i ($USER_ID) joined queue"
   sleep 1
 done
 ```
