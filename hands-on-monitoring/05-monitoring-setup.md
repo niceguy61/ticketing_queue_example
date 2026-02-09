@@ -42,12 +42,33 @@ helm repo update
 
 ### 2.2 Prometheus & Grafana 설치
 
+Grafana에 Loki, Tempo 데이터소스를 자동으로 프로비저닝하기 위해 values 파일을 사용합니다.
+
+> `kubernetes/grafana-values.yaml` 파일이 이미 준비되어 있습니다.
+
+```yaml
+# kubernetes/grafana-values.yaml
+grafana:
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki.monitoring.svc.cluster.local:3100
+      access: proxy
+      isDefault: false
+    - name: Tempo
+      type: tempo
+      url: http://tempo.monitoring.svc.cluster.local:3200
+      access: proxy
+      isDefault: false
+```
+
 ```bash
 helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
-  --set grafana.enabled=true \
-  --set prometheus.enabled=true
+  -f grafana-values.yaml
 ```
+
+> Grafana에 Prometheus(기본), Loki, Tempo 데이터소스가 자동으로 추가됩니다.
 
 ### 2.3 Loki (로그) 설치
 

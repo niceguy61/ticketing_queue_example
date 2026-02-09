@@ -157,9 +157,38 @@ kubectl apply -f rabbitmq.yaml
 
 ---
 
-## 5. 설치 확인
+## 5. 데이터베이스 스키마 초기화
 
-### 5.1 Helm 릴리스 확인
+PostgreSQL에 애플리케이션이 사용할 테이블과 초기 데이터를 생성합니다.
+
+```bash
+# PostgreSQL 비밀번호 확인
+PGPASSWORD=$(kubectl get secret --namespace ticketing postgres-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+
+# schema.sql 실행
+kubectl exec -i postgres-postgresql-0 -n ticketing -- \
+  env PGPASSWORD="$PGPASSWORD" psql -U postgres -d ticketing < ../backend/database/schema.sql
+```
+
+**예상 출력:**
+```
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+...
+INSERT 0 2
+INSERT 0 10
+...
+```
+
+> 테이블(users, sessions, tickets, events, seats, reservations)과 이벤트 초기 데이터가 생성됩니다.
+
+---
+
+## 6. 설치 확인
+
+### 6.1 Helm 릴리스 확인
 
 ```bash
 helm list -n ticketing
@@ -171,7 +200,7 @@ postgres   ticketing   1         deployed  postgresql-x.x.x      x.x
 redis      ticketing   1         deployed  redis-x.x.x           x.x.x
 ```
 
-### 5.2 파드 상태 확인
+### 6.2 파드 상태 확인
 
 ```bash
 kubectl get pods -n ticketing
@@ -186,7 +215,7 @@ redis-master-0              1/1     Running   0          3m
 
 > ⚠️ 파드가 `Running`이 되기까지 1~2분 정도 소요될 수 있습니다. `STATUS`가 `ContainerCreating`이면 잠시 기다린 후 다시 확인하세요.
 
-### 5.3 RabbitMQ Management 접속 테스트
+### 6.3 RabbitMQ Management 접속 테스트
 
 ```bash
 kubectl port-forward svc/rabbitmq -n ticketing 15672:15672

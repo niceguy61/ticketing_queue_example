@@ -55,7 +55,7 @@ kubectl port-forward --namespace monitoring svc/kube-prometheus-stack-grafana 30
 3. **Add data source** 클릭 및 설정:
     - **Prometheus**: URL `http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090` (기본값)
     - **Loki**: URL `http://loki.monitoring.svc.cluster.local:3100`
-    - **Tempo**: URL `http://tempo.monitoring.svc.cluster.local:3100`
+    - **Tempo**: URL `http://tempo.monitoring.svc.cluster.local:3200`
 
 ### 2.2 [Step 1] 로그 분석 (Loki) - "무슨 일이 있었나?"
 
