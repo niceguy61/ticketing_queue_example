@@ -77,19 +77,82 @@ helm install postgres bitnami/postgresql \
 
 ---
 
-## 4. RabbitMQ 설치 (Message Queue)
+## 4. RabbitMQ 배포 (Message Queue)
 
-서비스 간 비동기 메시징을 처리할 RabbitMQ를 설치합니다. Management Plugin이 기본 포함되어 있어 웹 UI로 상태를 확인할 수 있습니다.
+서비스 간 비동기 메시징을 처리할 RabbitMQ를 배포합니다. Management Plugin이 포함된 공식 이미지를 사용하여 웹 UI로 상태를 확인할 수 있습니다.
+
+> Bitnami RabbitMQ 이미지가 유료화 정책으로 pull이 안 될 수 있어, 공식 Docker Hub 이미지를 사용합니다.
+
+### 4.1 `rabbitmq.yaml` 작성
+
+> `kubernetes/rabbitmq.yaml` 파일이 이미 준비되어 있습니다.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: ticketing
+  labels:
+    app: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management-alpine
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              name: common-secret
+              key: RABBITMQ_USER
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: common-secret
+              key: RABBITMQ_PASSWORD
+        ports:
+        - name: amqp
+          containerPort: 5672
+        - name: management
+          containerPort: 15672
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: ticketing
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: 5672
+    - name: management
+      port: 15672
+      targetPort: 15672
+```
+
+### 4.2 적용하기
 
 ```bash
-helm install rabbitmq bitnami/rabbitmq \
-  --namespace ticketing \
-  --set auth.username=guest \
-  --set auth.password=guest \
-  --set resources.requests.memory=128Mi \
-  --set resources.requests.cpu=100m \
-  --set resources.limits.memory=256Mi \
-  --set resources.limits.cpu=500m
+kubectl apply -f rabbitmq.yaml
 ```
 
 ---
@@ -105,7 +168,6 @@ helm list -n ticketing
 ```
 NAME       NAMESPACE   REVISION  STATUS    CHART                 APP VERSION
 postgres   ticketing   1         deployed  postgresql-x.x.x      x.x
-rabbitmq   ticketing   1         deployed  rabbitmq-x.x.x        x.x.x
 redis      ticketing   1         deployed  redis-x.x.x           x.x.x
 ```
 
@@ -118,8 +180,8 @@ kubectl get pods -n ticketing
 ```
 NAME                        READY   STATUS    RESTARTS   AGE
 postgres-postgresql-0       1/1     Running   0          2m
-rabbitmq-0                  1/1     Running   0          1m
-redis-master-0              1/1     Running   0          2m
+rabbitmq-xxxxxxxxx-xxxxx    1/1     Running   0          1m
+redis-master-0              1/1     Running   0          3m
 ```
 
 > ⚠️ 파드가 `Running`이 되기까지 1~2분 정도 소요될 수 있습니다. `STATUS`가 `ContainerCreating`이면 잠시 기다린 후 다시 확인하세요.
@@ -131,8 +193,15 @@ kubectl port-forward svc/rabbitmq -n ticketing 15672:15672
 ```
 
 브라우저에서 `http://localhost:15672` 접속.
-- **ID**: `guest`
-- **PW**: `guest`
+
+로그인 정보는 Secret에서 확인할 수 있습니다:
+```bash
+# ID 확인
+kubectl get secret common-secret -n ticketing -o jsonpath='{.data.RABBITMQ_USER}' | base64 -d
+
+# PW 확인
+kubectl get secret common-secret -n ticketing -o jsonpath='{.data.RABBITMQ_PASSWORD}' | base64 -d
+```
 
 로그인 후 Dashboard가 보인다면 RabbitMQ가 정상적으로 설치된 것입니다.
 
@@ -140,7 +209,7 @@ kubectl port-forward svc/rabbitmq -n ticketing 15672:15672
 
 ## ✅ 체크포인트
 
-- [ ] `helm list -n ticketing`에서 3개 릴리스(redis, postgres, rabbitmq)가 `deployed` 상태이다.
+- [ ] `helm list -n ticketing`에서 2개 릴리스(redis, postgres)가 `deployed` 상태이다.
 - [ ] Redis, PostgreSQL, RabbitMQ 파드가 모두 `Running` 상태이다.
 - [ ] RabbitMQ Management UI (http://localhost:15672)에 접속할 수 있다.
 
