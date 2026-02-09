@@ -118,11 +118,10 @@ main() {
     fi
     
     echo ""
-    print_info "To run the images locally, use:"
-    print_info "  docker-compose up"
-    echo ""
-    print_info "To push images to registry, use:"
-    print_info "  ./scripts/push-to-ecr.sh"
+    print_info "To load images into k3d cluster, use:"
+    print_info "  k3d image import -c ticketing-cluster \\"
+    print_info "    queue-service:latest ticket-service:latest \\"
+    print_info "    user-service:latest frontend:latest"
 }
 
 # Show usage

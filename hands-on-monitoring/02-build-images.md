@@ -32,22 +32,22 @@ chmod +x scripts/build-images.sh
 ```
 
 **빌드되는 이미지 목록:**
-- `niceguy61/ticketing-queue-service:latest`
-- `niceguy61/ticketing-ticket-service:latest`
-- `niceguy61/ticketing-user-service:latest`
-- `niceguy61/ticketing-frontend:latest`
+- `queue-service:latest`
+- `ticket-service:latest`
+- `user-service:latest`
+- `frontend:latest`
 
 ### 1.2 빌드된 이미지 확인
 
 ```bash
-docker images | grep niceguy61
+docker images | grep -E "queue-service|ticket-service|user-service|frontend"
 ```
 **예상 출력:**
 ```
-niceguy61/ticketing-frontend        latest    ...
-niceguy61/ticketing-user-service    latest    ...
-niceguy61/ticketing-ticket-service  latest    ...
-niceguy61/ticketing-queue-service   latest    ...
+frontend          latest    ...
+user-service      latest    ...
+ticket-service    latest    ...
+queue-service     latest    ...
 ```
 
 ---
@@ -62,10 +62,10 @@ k3d는 로컬 Docker 데몬에 있는 이미지를 클러스터 내부의 컨테
 
 ```bash
 k3d image import -c ticketing-cluster \
-  niceguy61/ticketing-queue-service:latest \
-  niceguy61/ticketing-ticket-service:latest \
-  niceguy61/ticketing-user-service:latest \
-  niceguy61/ticketing-frontend:latest
+  queue-service:latest \
+  ticket-service:latest \
+  user-service:latest \
+  frontend:latest
 ```
 
 **예상 출력:**
@@ -73,7 +73,7 @@ k3d image import -c ticketing-cluster \
 INFO[0000] Importing into node 'k3d-ticketing-cluster-server-0'... 
 INFO[0000] Importing into node 'k3d-ticketing-cluster-agent-0'... 
 INFO[0000] Importing into node 'k3d-ticketing-cluster-agent-1'... 
-INFO[0005] Successfully imported niceguy61/ticketing-queue-service:latest
+INFO[0005] Successfully imported queue-service:latest
 ...
 INFO[0020] Cluster 'ticketing-cluster' imported images successfully!
 ```
@@ -86,7 +86,7 @@ INFO[0020] Cluster 'ticketing-cluster' imported images successfully!
 
 - [ ] 4개의 서비스 이미지가 로컬 Docker에 정상적으로 빌드되었다.
 - [ ] `k3d image import` 명령이 성공적으로 완료되었다.
-- [ ] (선택) `docker exec -it k3d-ticketing-cluster-agent-0 crictl images | grep niceguy61` 명령으로 노드 내부에서 이미지가 조회된다.
+- [ ] (선택) `docker exec -it k3d-ticketing-cluster-agent-0 crictl images | grep queue-service` 명령으로 노드 내부에서 이미지가 조회된다.
 
 ---
 
