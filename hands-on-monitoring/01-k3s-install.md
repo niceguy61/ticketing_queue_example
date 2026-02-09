@@ -48,13 +48,14 @@ brew install helm
 k3d를 사용하여 로컬 Kubernetes 클러스터를 생성합니다.
 
 ### 2.1 클러스터 설정 파일 작성
-Kubernetes 관련 파일을 격리하기 위해 `kubernetes` 폴더를 생성하고, 그 안에 `config.yaml` 파일을 작성합니다.
+Kubernetes 관련 파일을 격리하기 위해 `kubernetes` 폴더를 생성하고, 그 안에서 작업합니다.
 
 ```bash
 mkdir -p kubernetes
+cd kubernetes
 ```
 
-아래 내용으로 `kubernetes/config.yaml` 파일을 생성합니다.
+아래 내용으로 `config.yaml` 파일을 생성합니다.
 
 ```yaml
 apiVersion: k3d.io/v1alpha5

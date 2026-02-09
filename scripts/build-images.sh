@@ -32,13 +32,14 @@ print_warning() {
 # Function to build a service image
 build_service() {
     local service_name=$1
-    local service_path=$2
+    local build_context=$2
+    local dockerfile=$3
     local image_name="${REGISTRY:+$REGISTRY/}$service_name"
     
     print_info "Building $service_name..."
     
-    if [ ! -f "$service_path/Dockerfile" ]; then
-        print_error "Dockerfile not found at $service_path/Dockerfile"
+    if [ ! -f "$dockerfile" ]; then
+        print_error "Dockerfile not found at $dockerfile"
         return 1
     fi
     
@@ -46,8 +47,9 @@ build_service() {
     docker build \
         -t "$image_name:$VERSION" \
         -t "$image_name:latest" \
+        -f "$dockerfile" \
         $BUILD_ARGS \
-        "$service_path"
+        "$build_context"
     
     if [ $? -eq 0 ]; then
         print_info "Successfully built $image_name:$VERSION"
@@ -74,18 +76,18 @@ main() {
     
     # Build all services
     local services=(
-        "queue-service:services/queue-service"
-        "ticket-service:services/ticket-service"
-        "user-service:services/user-service"
-        "frontend:frontend"
+        "queue-service:backend:backend/services/queue-service/Dockerfile"
+        "ticket-service:backend:backend/services/ticket-service/Dockerfile"
+        "user-service:backend:backend/services/user-service/Dockerfile"
+        "frontend:frontend:frontend/Dockerfile"
     )
     
     local failed_services=()
     
     for service in "${services[@]}"; do
-        IFS=':' read -r name path <<< "$service"
+        IFS=':' read -r name context dockerfile <<< "$service"
         
-        if ! build_service "$name" "$path"; then
+        if ! build_service "$name" "$context" "$dockerfile"; then
             failed_services+=("$name")
         fi
         
@@ -103,7 +105,7 @@ main() {
         print_info ""
         print_info "Built images:"
         for service in "${services[@]}"; do
-            IFS=':' read -r name path <<< "$service"
+            IFS=':' read -r name context dockerfile <<< "$service"
             image_name="${REGISTRY:+$REGISTRY/}$name"
             echo "  - $image_name:$VERSION"
         done
@@ -163,4 +165,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Run main function
+# Resolve project root relative to this script's location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
 main
