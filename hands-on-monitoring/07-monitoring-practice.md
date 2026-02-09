@@ -27,27 +27,10 @@ kubectl port-forward svc/user-service -n ticketing 3003:3003 &
 
 # 2. 트래픽 생성 (터미널 2)
 # 10명의 사용자를 등록하고 1초 간격으로 대기열에 진입하는 시나리오
-for i in {1..10}; do
-  # 사용자 등록 (UUID 발급)
-  RESPONSE=$(curl -s -X POST http://localhost:3003/api/users/register \
-    -H "Content-Type: application/json" \
-    -d "{\"username\": \"testuser-$i\", \"email\": \"testuser-$i@example.com\"}")
-  
-  USER_ID=$(echo $RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['userId'])" 2>/dev/null)
-  
-  if [ -z "$USER_ID" ]; then
-    echo "Failed to register user $i: $RESPONSE"
-    continue
-  fi
-  
-  # 대기열 진입
-  curl -s -X POST http://localhost:3001/api/queue/lobby/join \
-    -H "Content-Type: application/json" \
-    -d "{\"userId\": \"$USER_ID\"}"
-  echo " - User $i ($USER_ID) joined queue"
-  sleep 1
-done
+../scripts/generate-traffic.sh 10
 ```
+
+> `generate-traffic.sh`는 user-service에 회원가입하여 UUID를 발급받은 뒤, 해당 UUID로 queue-service 대기열에 진입합니다. 인자로 사용자 수를 지정할 수 있습니다 (기본값: 10).
 
 > **팁**: 더 많은 트래픽을 원한다면 `ab` (Apache Benchmark)나 `k6` 같은 도구를 사용할 수 있지만, 이번 실습에서는 위 스크립트로 충분합니다.
 
