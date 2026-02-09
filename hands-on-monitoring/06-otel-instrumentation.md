@@ -36,38 +36,36 @@ spec:
           http:
 
     processors:
-      batch:
+      batch: {}
 
     exporters:
-      # Prometheus로 메트릭 내보내기 (Scrape 대상이 됨)
-      prometheus:
-        endpoint: "0.0.0.0:8889"
-      
       # Tempo로 트레이스 내보내기
-      otlp:
+      otlp/tempo:
         endpoint: "tempo.monitoring.svc.cluster.local:4317"
         tls:
           insecure: true
       
-      # Loki로 로그 내보내기 (HTTP API 사용)
-      loki:
-        endpoint: "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+      # 디버그 로그 (개발용)
+      debug:
+        verbosity: basic
 
     service:
       pipelines:
         traces:
           receivers: [otlp]
           processors: [batch]
-          exporters: [otlp]
+          exporters: [otlp/tempo]
         metrics:
           receivers: [otlp]
           processors: [batch]
-          exporters: [prometheus]
+          exporters: [debug]
         logs:
           receivers: [otlp]
           processors: [batch]
-          exporters: [loki]
+          exporters: [debug]
 ```
+
+> **참고**: 기본 Collector 이미지(`otel/opentelemetry-collector-k8s`)에는 `prometheus`, `loki` exporter가 포함되어 있지 않습니다. 트레이스는 `otlp/tempo`로 Tempo에 전송하고, 로그는 Promtail이 수집하여 Loki로 전송합니다. 메트릭은 Prometheus가 직접 scrape합니다.
 
 **적용하기:**
 ```bash

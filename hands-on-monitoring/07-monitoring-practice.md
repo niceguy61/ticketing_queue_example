@@ -52,10 +52,9 @@ kubectl port-forward --namespace monitoring svc/kube-prometheus-stack-grafana 30
 
 1. 브라우저에서 `http://localhost:3000` 접속 (ID: `admin`, PW: 위에서 확인한 값)
 2. **Configuration -> Data Sources** 이동
-3. **Add data source** 클릭 및 설정:
-    - **Prometheus**: URL `http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090` (기본값)
-    - **Loki**: URL `http://loki.monitoring.svc.cluster.local:3100`
-    - **Tempo**: URL `http://tempo.monitoring.svc.cluster.local:3200`
+3. Prometheus, Loki, Tempo 데이터소스가 자동으로 추가되어 있는지 확인합니다.
+
+> 05단계에서 `grafana-values.yaml`을 통해 데이터소스가 자동 프로비저닝되었습니다. 수동 추가가 필요하지 않습니다.
 
 ### 2.2 [Step 1] 로그 분석 (Loki) - "무슨 일이 있었나?"
 

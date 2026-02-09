@@ -4,7 +4,7 @@
 
 ---
 
-⏱️ **예상 소요 시간**: 10분
+⏱️ **예상 소요 시간**: 15분
 
 ## 목표
 
@@ -17,7 +17,6 @@ Kubernetes 환경에서 관찰성(Observability) 데이터를 수집하고 저�
 이전 단계에서 애플리케이션이 `ticketing` 네임스페이스에 배포되어 있어야 합니다.
 
 ```bash
-# 네임스페이스 확인
 kubectl get ns ticketing
 ```
 
@@ -76,10 +75,10 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 helm install loki grafana/loki-stack \
   --namespace monitoring \
   --set grafana.enabled=false \
-  --set prometheus.enabled=false \
-  --set prometheus.isDefault=false \
-  --set loki.isDefault=false
+  --set prometheus.enabled=false
 ```
+
+> `grafana.enabled=false`로 설정하여 Grafana 중복 설치를 방지합니다. Loki 데이터소스는 2.2에서 이미 프로비저닝했습니다.
 
 ### 2.4 Tempo (트레이싱) 설치
 
@@ -90,7 +89,33 @@ helm install tempo grafana/tempo \
 
 ---
 
-## 3. OpenTelemetry Operator 설치
+## 3. cert-manager 설치
+
+OpenTelemetry Operator는 Webhook 인증서 관리를 위해 **cert-manager**가 필요합니다.
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
+```
+
+cert-manager 파드가 모두 Running 상태가 될 때까지 기다립니다.
+
+```bash
+kubectl get pods -n cert-manager
+```
+
+**예상 출력:**
+```
+NAME                                      READY   STATUS    RESTARTS   AGE
+cert-manager-cainjector-xxxxx             1/1     Running   0          1m
+cert-manager-xxxxx                        1/1     Running   0          1m
+cert-manager-webhook-xxxxx                1/1     Running   0          1m
+```
+
+> ⚠️ cert-manager 파드가 모두 Running이 된 후에 다음 단계를 진행하세요. 준비되지 않은 상태에서 OTel Operator를 설치하면 실패합니다.
+
+---
+
+## 4. OpenTelemetry Operator 설치
 
 애플리케이션에 OTel 에이전트를 자동으로 주입하고 관리해주는 Operator를 설치합니다.
 
@@ -105,7 +130,7 @@ helm install opentelemetry-operator open-telemetry/opentelemetry-operator \
 
 ---
 
-## 4. 설치 확인
+## 5. 설치 확인
 
 모든 모니터링 인프라가 정상적으로 구동 중인지 확인합니다.
 
@@ -114,18 +139,22 @@ kubectl get pods -n monitoring
 ```
 
 **예상 출력 (모두 Running 상태여야 함):**
-- `kube-prometheus-stack-operator...`
-- `kube-prometheus-stack-prometheus...`
-- `kube-prometheus-stack-grafana...`
+- `kube-prometheus-stack-operator-...`
+- `kube-prometheus-stack-prometheus-...`
+- `kube-prometheus-stack-grafana-...`
 - `loki-0`
+- `loki-promtail-...` (DaemonSet, 노드 수만큼)
 - `tempo-0`
-- `opentelemetry-operator...`
+- `opentelemetry-operator-...`
+
+> ⚠️ 일부 파드가 `ContainerCreating` 상태일 수 있습니다. 1~2분 후 다시 확인하세요.
 
 ---
 
 ## ✅ 체크포인트
 
 - [ ] `monitoring` 네임스페이스에 Prometheus, Grafana, Loki, Tempo 파드가 실행 중이다.
+- [ ] `cert-manager` 네임스페이스에 cert-manager 파드가 실행 중이다.
 - [ ] `monitoring` 네임스페이스에 opentelemetry-operator 파드가 실행 중이다.
 
 ---
