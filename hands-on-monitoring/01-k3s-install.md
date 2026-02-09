@@ -136,6 +136,12 @@ k3d-ticketing-cluster-agent-1    Ready    <none>                 2m      v1.26.1
 k3d-ticketing-cluster-server-0   Ready    control-plane,master   2m      v1.26.10+k3s2
 ```
 
+> ⚠️ 클러스터 생성 직후에는 아래와 같은 에러가 함께 출력될 수 있습니다.
+> ```
+> E0209 memcache.go:287] "Unhandled Error" err="couldn't get resource list for metrics.k8s.io/v1beta1: the server is currently unable to handle the request"
+> ```
+> metrics-server 파드가 아직 완전히 기동되지 않아서 발생하는 것으로, **정상적인 현상**입니다. 노드 상태가 모두 `Ready`이면 무시하고 진행하세요. 1~2분 후 재실행하면 사라집니다.
+
 ### 3.2 전체 파드 확인
 ```bash
 kubectl get pods -A
